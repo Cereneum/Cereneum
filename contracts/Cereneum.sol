@@ -14,38 +14,38 @@ contract Cereneum is CereneumImplementation
 			bytes32 a_hBSVMerkleTreeRoot,
 			bytes32 a_hETHMerkleTreeRoot,
 			bytes32 a_hLTCMerkleTreeRoot,
-	    uint256 a_nMaxRedeemable,
-	    uint256 a_nUTXOCountAtSnapshot,
+	    		uint256 a_nMaxRedeemable,
+	    		uint256 a_nUTXOCountAtSnapshot,
 			address a_genesisAddress
-  )
+  	)
 	public
 	{
 		//Store the launch time of the contract
-    m_tContractLaunchTime = block.timestamp;
-    m_hMerkleTreeRootsArray[0] = a_hBTCMerkleTreeRoot;
+    		m_tContractLaunchTime = block.timestamp;
+    		m_hMerkleTreeRootsArray[0] = a_hBTCMerkleTreeRoot;
 		m_hMerkleTreeRootsArray[1] = a_hBCHMerkleTreeRoot;
 		m_hMerkleTreeRootsArray[2] = a_hBSVMerkleTreeRoot;
 		m_hMerkleTreeRootsArray[3] = a_hETHMerkleTreeRoot;
 		m_hMerkleTreeRootsArray[4] = a_hLTCMerkleTreeRoot;
-    m_nMaxRedeemable = a_nMaxRedeemable;
+    		m_nMaxRedeemable = a_nMaxRedeemable;
 		m_nAdjustedMaxRedeemable = a_nMaxRedeemable; //TODO
-    m_nUTXOCountAtSnapshot = a_nUTXOCountAtSnapshot;
+    		m_nUTXOCountAtSnapshot = a_nUTXOCountAtSnapshot;
 		m_genesis = a_genesisAddress;
 
 		//All ratios have an invisible 0.0 in front of them
 		m_blockchainRatios[0] = 3402; //BCH
-	  m_blockchainRatios[1] = 1501; //BSV
-	  m_blockchainRatios[2] = 4131; //ETH
-	  m_blockchainRatios[3] = 1612; //LTC
+	  	m_blockchainRatios[1] = 1501; //BSV
+	  	m_blockchainRatios[2] = 4131; //ETH
+	  	m_blockchainRatios[3] = 1612; //LTC
 
-    //Mint all claimable coins to contract wallet
-    _mint(address(this), m_nMaxRedeemable);
+    		//Mint all claimable coins to contract wallet
+    		_mint(address(this), m_nMaxRedeemable);
 	}
 
 	//ERC20 Constants
-  string public constant name = "Cereneum";
-  string public constant symbol = "CER";
-  uint public constant decimals = 8;
+  	string public constant name = "Cereneum";
+  	string public constant symbol = "CER";
+  	uint public constant decimals = 8;
 
 	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
 	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
@@ -56,41 +56,41 @@ contract Cereneum is CereneumImplementation
 		uint256 nMaxDays = 350;
 		a_nAmount = a_nAmount.div(5);
 		return a_nAmount.mul(nMaxDays.sub(a_nDays)).div(nMaxDays);
-  }
+  	}
 
 	function testGetLateClaimAdjustedAmount(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256) {
 		uint256 nMaxDays = 350;
-    return a_nAmount.mul(nMaxDays.sub(a_nDays)).div(nMaxDays);
-  }
+    		return a_nAmount.mul(nMaxDays.sub(a_nDays)).div(nMaxDays);
+  	}
 
 	function testAdjustContractLaunchTime(
-    uint256 a_days
-  ) external
+    		uint256 a_days
+  	) external
 	{
 		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
 		UpdateDailyData();
 	}
 
 	function testAdjustContractLaunchTimeHours(
-    uint256 a_hours
-  ) external
+    		uint256 a_hours
+  	) external
 	{
 		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_hours.mul(1 hours));
 		UpdateDailyData();
 	}
 
 	function AdjustContractLaunchTime(
-    uint256 a_days
-  ) external
+    		uint256 a_days
+  	) external
 	{
 		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
 	}
 
 	function testAdjustStakeFriendlyTime(
-    uint256 a_nStakeIndex,
+    		uint256 a_nStakeIndex,
 		uint256 a_days,
 		address a_address
-  ) external
+  	) external
 	{
 		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
 		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
@@ -100,10 +100,10 @@ contract Cereneum is CereneumImplementation
 	}
 
 	function testAdjustStakeTime(
-    uint256 a_nStakeIndex,
+    		uint256 a_nStakeIndex,
 		uint256 a_days,
 		address a_address
-  ) external
+  	) external
 	{
 		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
 		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
@@ -112,10 +112,10 @@ contract Cereneum is CereneumImplementation
 	}
 
 	function testAdjustStakeTimeHours(
-    uint256 a_nStakeIndex,
+    		uint256 a_nStakeIndex,
 		uint256 a_hours,
 		address a_address
-  ) external
+  	) external
 	{
 		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_hours.mul(1 hours));
 		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_hours.mul(1 hours));
