@@ -29,7 +29,7 @@ truffle test
 
 ## Deployment
 
-Make sure Gananche is running with the proper configurations matched to truffle-config.js
+Make sure Ganache is running with the proper configurations matched to truffle-config.js
 
 ```
 truffle migrate
