@@ -4,7 +4,7 @@ Cereneum is an Ethereum ERC20 token and contract that airdrops to BTC, BCH, BSV,
 
 ## Getting Started
 
-Install truffle and gananche. https://truffleframework.com/
+Install truffle and ganache. https://truffleframework.com/
 
 I recommend atom as well. https://atom.io/
 
