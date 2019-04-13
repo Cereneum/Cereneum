@@ -2,6 +2,8 @@
 
 Cereneum is an Ethereum ERC20 token and contract that airdrops to BTC, BCH, BSV, ETH and LTC simultaneously. Cereneum tokens can be staked for specified time periods and will receive interest payouts. For a detailed explanation please visit www.cereneum.com
 
+The project requires a Merkle Tree Root for each blockchain supported. You may check the Unit Tests for several examples of working Merkle Tree Proofs. The UTXOs and Merkle Trees for all 5 chains will be made public (as CSV files) after the Snapshot date.
+
 ## Getting Started
 
 Install truffle and ganache. https://truffleframework.com/
