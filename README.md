@@ -27,6 +27,8 @@ There are currently over 70 Unit Tests for Cereneum.
 truffle test
 ```
 
+It is important to note that the contract has temporary functions and some temporary parameters on important functions only meant for Unit Testing. For example, testAdjustContractLaunchTime subtracts X days from the launch timestamp of the project, effectively moving contract time forward by X days. These test functions will be removed before the final version of the contract is uploaded.
+
 ## Deployment
 
 Make sure Ganache is running with the proper configurations matched to truffle-config.js
