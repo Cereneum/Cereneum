@@ -8,64 +8,64 @@ contract Cereneum is CereneumImplementation
 {
 using SafeMath for uint256;
 
-	constructor(
-			bytes32 a_hBTCMerkleTreeRoot,
-			bytes32 a_hBCHMerkleTreeRoot,
-			bytes32 a_hBSVMerkleTreeRoot,
-			bytes32 a_hETHMerkleTreeRoot,
-			bytes32 a_hLTCMerkleTreeRoot
+  constructor(
+    bytes32 a_hBTCMerkleTreeRoot,
+    bytes32 a_hBCHMerkleTreeRoot,
+    bytes32 a_hBSVMerkleTreeRoot,
+    bytes32 a_hETHMerkleTreeRoot,
+    bytes32 a_hLTCMerkleTreeRoot
   )
-	public
-	{
-		//Store the launch time of the contract
+  public
+  {
+    //Store the launch time of the contract
     m_tContractLaunchTime = block.timestamp;
     m_hMerkleTreeRootsArray[0] = a_hBTCMerkleTreeRoot;
-		m_hMerkleTreeRootsArray[1] = a_hBCHMerkleTreeRoot;
-		m_hMerkleTreeRootsArray[2] = a_hBSVMerkleTreeRoot;
-		m_hMerkleTreeRootsArray[3] = a_hETHMerkleTreeRoot;
-		m_hMerkleTreeRootsArray[4] = a_hLTCMerkleTreeRoot;
+    m_hMerkleTreeRootsArray[1] = a_hBCHMerkleTreeRoot;
+    m_hMerkleTreeRootsArray[2] = a_hBSVMerkleTreeRoot;
+    m_hMerkleTreeRootsArray[3] = a_hETHMerkleTreeRoot;
+    m_hMerkleTreeRootsArray[4] = a_hLTCMerkleTreeRoot;
 
-		//All ratios have an invisible 0.0 in front of them
-		m_blockchainRatios[0] = 3402; //BCH
-	  m_blockchainRatios[1] = 1501; //BSV
-	  m_blockchainRatios[2] = 4131; //ETH
-	  m_blockchainRatios[3] = 1612; //LTC
+    //All ratios have an invisible 0.0 in front of them
+    m_blockchainRatios[0] = 3402; //BCH
+    m_blockchainRatios[1] = 1501; //BSV
+    m_blockchainRatios[2] = 4131; //ETH
+    m_blockchainRatios[3] = 1612; //LTC
 
-		//Binance 1
-		m_exchangeAirdropAddresses[0] = 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE;
-		m_exchangeAirdropAmounts[0] = 8339472538853;
+    //Binance 1
+    m_exchangeAirdropAddresses[0] = 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE;
+    m_exchangeAirdropAmounts[0] = 8339472538853;
 
-		//Binance 2
-		m_exchangeAirdropAddresses[1] = 0xD551234Ae421e3BCBA99A0Da6d736074f22192FF;
-		m_exchangeAirdropAmounts[1] = 1479588273675;
+    //Binance 2
+    m_exchangeAirdropAddresses[1] = 0xD551234Ae421e3BCBA99A0Da6d736074f22192FF;
+    m_exchangeAirdropAmounts[1] = 1479588273675;
 
-		//Binance 3
-		m_exchangeAirdropAddresses[2] = 0x564286362092D8e7936f0549571a803B203aAceD;
-		m_exchangeAirdropAmounts[2] = 1113952670976;
+    //Binance 3
+    m_exchangeAirdropAddresses[2] = 0x564286362092D8e7936f0549571a803B203aAceD;
+    m_exchangeAirdropAmounts[2] = 1113952670976;
 
-		//Binance 4
-		m_exchangeAirdropAddresses[3] = 0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF;
-		m_exchangeAirdropAmounts[3] = 1452680420343;
+    //Binance 4
+    m_exchangeAirdropAddresses[3] = 0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF;
+    m_exchangeAirdropAmounts[3] = 1452680420343;
 
-		//Binance 5 has little ether in it
+    //Binance 5 has little ether in it
 
-		//Binance 6
-		m_exchangeAirdropAddresses[4] = 0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67;
-		m_exchangeAirdropAmounts[4] = 235660201854981;
+    //Binance 6
+    m_exchangeAirdropAddresses[4] = 0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67;
+    m_exchangeAirdropAmounts[4] = 235660201854981;
 
-		//Bitfinex
+    //Bitfinex
 
-		//Bittrex
+    //Bittrex
 
-		//KuCoin
+    //KuCoin
 
-		//LAToken
+    //LAToken
 
     //Mint all claimable coins to contract wallet
     _mint(address(this), m_nMaxRedeemable);
-	}
+  }
 
-	//ERC20 Constants
+  //ERC20 Constants
   string public constant name = "Cereneum";
   string public constant symbol = "CER";
   uint public constant decimals = 8;
