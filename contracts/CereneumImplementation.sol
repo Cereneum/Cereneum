@@ -4,14 +4,14 @@ import "./CereneumData.sol";
 
 contract CereneumImplementation is CereneumData
 {
-	using SafeMath for uint256;
+  using SafeMath for uint256;
 
-	//Events
+  //Events
   event ClaimEvent(
     uint256 nOriginalClaimAmount,
     uint256 nAmountGranted,
     uint256 nBonuses,
-		uint256 nPenalties,
+    uint256 nPenalties,
     bool bWasReferred
   );
 
@@ -20,9 +20,9 @@ contract CereneumImplementation is CereneumData
     uint256 nDays
   );
 
-	event CompoundInterestEvent(
-		uint256 nInterestCompounded
-	);
+  event CompoundInterestEvent(
+    uint256 nInterestCompounded
+  );
 
   event EndStakeEvent(
     uint256 nPrincipal,
@@ -38,45 +38,45 @@ contract CereneumImplementation is CereneumData
     uint256 tStakeEndTimeCommit
   );
 
-	/// @dev Returns the number of current stakes for given address.
-	///	@param a_address Address of stake to lookup
-	///	@return The number of stakes.
-	function GetNumberOfStakes(
-		address a_address
-	)
-	public view returns (uint256)
-	{
-		return m_staked[a_address].length;
-	}
+  /// @dev Returns the number of current stakes for given address.
+  /// @param a_address Address of stake to lookup
+  /// @return The number of stakes.
+  function GetNumberOfStakes(
+    address a_address
+  )
+  public view returns (uint256)
+  {
+    return m_staked[a_address].length;
+  }
 
-	/// @dev Returns the number of current Eth pool stakes for given address.
-	///	@param a_address Address of stake to lookup
-	///	@return The number of stakes.
-	function GetNumberOfEthPoolStakes(
-		address a_address
-	)
-	public view returns (uint256)
-	{
-		return m_EthereumStakers[a_address].length;
-	}
+  /// @dev Returns the number of current Eth pool stakes for given address.
+  /// @param a_address Address of stake to lookup
+  /// @return The number of stakes.
+  function GetNumberOfEthPoolStakes(
+    address a_address
+  )
+  public view returns (uint256)
+  {
+    return m_EthereumStakers[a_address].length;
+  }
 
   /// @dev Returns the timestamp until the next daily update
-	///	@return The time until the next daily update.
-	function GetTimeUntilNextDailyUpdate() public view returns (uint256)
-	{
+  /// @return The time until the next daily update.
+  function GetTimeUntilNextDailyUpdate() public view returns (uint256)
+  {
     uint256 nDay = 1 days;
-		return nDay.sub((block.timestamp.sub(m_tContractLaunchTime)).mod(1 days));
-	}
+    return nDay.sub((block.timestamp.sub(m_tContractLaunchTime)).mod(1 days));
+  }
 
-	/// @dev Calculates difference between 2 timestamps in days
- 	/// @param a_nStartTime beginning timestamp
+  /// @dev Calculates difference between 2 timestamps in days
+  /// @param a_nStartTime beginning timestamp
   /// @param a_nEndTime ending timestamp
   /// @return Difference between timestamps in days
   function DifferenceInDays(
     uint256 a_nStartTime,
     uint256 a_nEndTime
   ) public pure returns (uint256)
-	{
+  {
     return (a_nEndTime.sub(a_nStartTime).div(1 days));
   }
 
