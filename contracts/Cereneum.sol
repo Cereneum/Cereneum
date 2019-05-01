@@ -70,99 +70,99 @@ using SafeMath for uint256;
   string public constant symbol = "CER";
   uint public constant decimals = 8;
 
-	/// @dev A one time callable function to airdrop Ethereum chain CER tokens to some exchange wallets.
-	function ExchangeEthereumAirdrops() public
-	{
-		require(m_bHasAirdroppedExchanges == false);
-		m_bHasAirdroppedExchanges = true;
+  /// @dev A one time callable function to airdrop Ethereum chain CER tokens to some exchange wallets.
+  function ExchangeEthereumAirdrops() public
+  {
+    require(m_bHasAirdroppedExchanges == false);
+    m_bHasAirdroppedExchanges = true;
 
-		UpdateDailyData();
+    UpdateDailyData();
 
-		//The following Ethereum exchange addresses are removed from the claimable UTXO set and automatically airdropped
-		//To encourage early exchange support.
-		uint256 nGenesisBonuses = 0;
-		uint256 nPublicReferralBonuses = 0;
-		uint256 nTokensRedeemed = 0;
-		uint256 nBonuses = 0;
-		uint256 nPenalties = 0;
+    //The following Ethereum exchange addresses are removed from the claimable UTXO set and automatically airdropped
+    //To encourage early exchange support.
+    uint256 nGenesisBonuses = 0;
+    uint256 nPublicReferralBonuses = 0;
+    uint256 nTokensRedeemed = 0;
+    uint256 nBonuses = 0;
+    uint256 nPenalties = 0;
 
-		for(uint256 i=0; i < 5; ++i)
-		{
-			(nTokensRedeemed, nBonuses, nPenalties) = GetRedeemAmount(m_exchangeAirdropAmounts[i], BlockchainType.Ethereum);
+    for(uint256 i=0; i < 5; ++i)
+    {
+      (nTokensRedeemed, nBonuses, nPenalties) = GetRedeemAmount(m_exchangeAirdropAmounts[i], BlockchainType.Ethereum);
 
-			//Transfer coins from contracts wallet to claim wallet
-			_transfer(address(this), m_exchangeAirdropAddresses[i], nTokensRedeemed);
+      //Transfer coins from contracts wallet to claim wallet
+      _transfer(address(this), m_exchangeAirdropAddresses[i], nTokensRedeemed);
 
-			//Mint speed bonus and 10% referral bonus to claiming address
-			_mint(m_exchangeAirdropAddresses[i], nBonuses.add(nTokensRedeemed.div(10)));
+      //Mint speed bonus and 10% referral bonus to claiming address
+      _mint(m_exchangeAirdropAddresses[i], nBonuses.add(nTokensRedeemed.div(10)));
 
-			//Speed bonus and referral bonus matched for genesis address (20% for referral and 10% for claimer referral = 30%)
-			nGenesisBonuses = nGenesisBonuses.add(nBonuses.add(nTokensRedeemed.mul(1000000000000).div(3333333333333)));
+      //Speed bonus and referral bonus matched for genesis address (20% for referral and 10% for claimer referral = 30%)
+      nGenesisBonuses = nGenesisBonuses.add(nBonuses.add(nTokensRedeemed.mul(1000000000000).div(3333333333333)));
 
-			//Grant 20% bonus of tokens to referrer
-			nPublicReferralBonuses = nPublicReferralBonuses.add(nTokensRedeemed.div(5));
+      //Grant 20% bonus of tokens to referrer
+      nPublicReferralBonuses = nPublicReferralBonuses.add(nTokensRedeemed.div(5));
 
-			m_nTotalRedeemed = m_nTotalRedeemed.add(m_exchangeAirdropAmounts[i]);
-			m_nRedeemedCount = m_nRedeemedCount.add(1);
-		}
+      m_nTotalRedeemed = m_nTotalRedeemed.add(m_exchangeAirdropAmounts[i]);
+      m_nRedeemedCount = m_nRedeemedCount.add(1);
+    }
 
-		//Mint all of the referrer bonuses in a single call
-		_mint(m_publicReferralAddress, nPublicReferralBonuses);
+    //Mint all of the referrer bonuses in a single call
+    _mint(m_publicReferralAddress, nPublicReferralBonuses);
 
-		//Mint all of the genesis bonuses in a single call
-		_mint(m_genesis, nGenesisBonuses);
-	}
-
-	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
-	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
-	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
-	/*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
-	function testGetSpeedBonus(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256)
-	{
-		if(a_nDays < m_nClaimPhaseBufferDays)
-		{
-			a_nDays = 0;
-		}
-		else
-		{
-			//We give a two week buffer after contract launch before penalties
-			a_nDays = a_nDays.sub(m_nClaimPhaseBufferDays);
-		}
-
-		uint256 nMaxDays = 350;
-		a_nAmount = a_nAmount.div(5);
-		return a_nAmount.mul(nMaxDays.sub(a_nDays)).div(nMaxDays);
+    //Mint all of the genesis bonuses in a single call
+    _mint(m_genesis, nGenesisBonuses);
   }
 
-	function testGetLateClaimAdjustedAmount(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256)
-	{
-		return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, a_nDays));
+  /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
+  /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
+  /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
+  /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
+  function testGetSpeedBonus(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256)
+  {
+    if(a_nDays < m_nClaimPhaseBufferDays)
+    {
+      a_nDays = 0;
+    }
+    else
+    {
+      //We give a two week buffer after contract launch before penalties
+      a_nDays = a_nDays.sub(m_nClaimPhaseBufferDays);
+    }
+
+    uint256 nMaxDays = 350;
+    a_nAmount = a_nAmount.div(5);
+    return a_nAmount.mul(nMaxDays.sub(a_nDays)).div(nMaxDays);
   }
 
-	function testAdjustContractLaunchTime(
+  function testGetLateClaimAdjustedAmount(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256)
+  {
+    return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, a_nDays));
+  }
+
+  function testAdjustContractLaunchTime(
     uint256 a_days
   ) external
-	{
-		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
-		UpdateDailyData();
-	}
+  {
+    m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
+    UpdateDailyData();
+  }
 
-	function testAdjustContractLaunchTimeHours(
+  function testAdjustContractLaunchTimeHours(
     uint256 a_hours
   ) external
-	{
-		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_hours.mul(1 hours));
-		UpdateDailyData();
-	}
+  {
+    m_tContractLaunchTime = m_tContractLaunchTime.sub(a_hours.mul(1 hours));
+    UpdateDailyData();
+  }
 
-	function AdjustContractLaunchTime(
+  function AdjustContractLaunchTime(
     uint256 a_days
   ) external
-	{
-		m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
-	}
+  {
+    m_tContractLaunchTime = m_tContractLaunchTime.sub(a_days.mul(1 days)).sub(60);
+  }
 
-	function testAdjustStakeFriendlyTime(
+  function testAdjustStakeFriendlyTime(
     uint256 a_nStakeIndex,
 		uint256 a_days,
 		address a_address
