@@ -1092,73 +1092,73 @@ contract CereneumImplementation is CereneumData
     uint256 a_tTimeRemovedFromGlobalPool,
     uint256 a_nInterestEarned
   ) public pure returns (uint256)
-	{
+  {
     uint256 nPenalty = 0;
 
-		//One week grace period
+    //One week grace period
     if(a_tTimeRemovedFromGlobalPool > a_tEndStakeCommitTime.add(1 weeks))
-		{
+    {
       //Penalty is 1% per day after the 1 week grace period
       uint256 nPenaltyPercent = DifferenceInDays(a_tEndStakeCommitTime.add(1 weeks), a_tTimeRemovedFromGlobalPool);
 
-			//Cap max percent at 100
-			if(nPenaltyPercent > 100)
-			{
-				nPenaltyPercent = 100;
-			}
+      //Cap max percent at 100
+      if(nPenaltyPercent > 100)
+      {
+        nPenaltyPercent = 100;
+      }
 
       //Calculate penalty
-			nPenalty = a_nInterestEarned.mul(nPenaltyPercent).div(100);
+      nPenalty = a_nInterestEarned.mul(nPenaltyPercent).div(100);
     }
 
     return nPenalty;
   }
 
   /// @dev Calculates penalty for unstaking early
-	/// @param a_tLockTime Starting timestamp of stake
+  /// @param a_tLockTime Starting timestamp of stake
   /// @param a_nEndStakeCommitTime Timestamp the stake matures
   /// @param a_nAmount Amount that was staked
-	/// @param a_nInterestEarned Interest earned from stake
+  /// @param a_nInterestEarned Interest earned from stake
   /// @return penalty value
   function CalculateEarlyPenalty(
-		uint256 a_tLockTime,
-		uint256 a_nEndStakeCommitTime,
+    uint256 a_tLockTime,
+    uint256 a_nEndStakeCommitTime,
     uint256 a_nAmount,
-		uint256 a_nInterestEarned
+    uint256 a_nInterestEarned
   ) public view returns (uint256)
-	{
+  {
     uint256 nPenalty = 0;
 
     if(block.timestamp < a_nEndStakeCommitTime)
-		{
-			//If they didn't stake for at least 1 full day we give them no interest
-			//To prevent any abuse
-			if(DifferenceInDays(a_tLockTime, block.timestamp) == 0)
-			{
-				nPenalty = a_nInterestEarned;
-			}
-			else
-			{
-				//Base penalty is half of earned interest
-				nPenalty = a_nInterestEarned.div(2);
-			}
+    {
+      //If they didn't stake for at least 1 full day we give them no interest
+      //To prevent any abuse
+      if(DifferenceInDays(a_tLockTime, block.timestamp) == 0)
+      {
+        nPenalty = a_nInterestEarned;
+      }
+      else
+      {
+        //Base penalty is half of earned interest
+        nPenalty = a_nInterestEarned.div(2);
+      }
 
-			uint256 nCommittedStakeDays = DifferenceInDays(a_tLockTime, a_nEndStakeCommitTime);
+      uint256 nCommittedStakeDays = DifferenceInDays(a_tLockTime, a_nEndStakeCommitTime);
 
-			if(nCommittedStakeDays >= 90)
-			{
-				//Take another 10% per year of committed stake
-				nPenalty = nPenalty.add(nPenalty.mul(nCommittedStakeDays).div(3650));
-			}
+      if(nCommittedStakeDays >= 90)
+      {
+        //Take another 10% per year of committed stake
+        nPenalty = nPenalty.add(nPenalty.mul(nCommittedStakeDays).div(3650));
+      }
 
-			//5% yearly interest converted to daily interest multiplied by stake time
-			uint256 nMinimumPenalty = a_nAmount.mul(nCommittedStakeDays).div(7300);
+      //5% yearly interest converted to daily interest multiplied by stake time
+      uint256 nMinimumPenalty = a_nAmount.mul(nCommittedStakeDays).div(7300);
 
-			if(nMinimumPenalty > nPenalty)
-			{
-				nPenalty = nMinimumPenalty;
-			}
-		}
+      if(nMinimumPenalty > nPenalty)
+      {
+        nPenalty = nMinimumPenalty;
+      }
+    }
 
     return nPenalty;
   }
@@ -1166,30 +1166,30 @@ contract CereneumImplementation is CereneumData
   /// @dev Removes completed stake from global pool
   /// @notice Removing finished stakes will increase the payout to other stakers.
   /// @param a_nStakeIndex Index of stake to process
-	/// @param a_address Address of the staker
+  /// @param a_address Address of the staker
   function EndStakeForAFriend(
     uint256 a_nStakeIndex,
-		address a_address
+    address a_address
   ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[a_address].length > a_nStakeIndex, "Stake does not exist");
+  {
+    //Require that the stake index doesn't go out of bounds
+    require(m_staked[a_address].length > a_nStakeIndex, "Stake does not exist");
 
     //Require that the stake has been matured
     require(block.timestamp > m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
 
-		ProcessStakeEnding(a_nStakeIndex, a_address, true);
+    ProcessStakeEnding(a_nStakeIndex, a_address, true);
   }
 
- 	/// @dev Ends a stake, even if it is before it has matured.
-	/// @notice If stake has matured behavior is the same as EndStakeSafely
+  /// @dev Ends a stake, even if it is before it has matured.
+  /// @notice If stake has matured behavior is the same as EndStakeSafely
   /// @param a_nStakeIndex Index of stake to close
   function EndStakeEarly(
     uint256 a_nStakeIndex
   ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
+  {
+    //Require that the stake index doesn't go out of bounds
+    require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
 
     ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
   }
@@ -1199,69 +1199,69 @@ contract CereneumImplementation is CereneumData
   function EndStakeSafely(
     uint256 a_nStakeIndex
   ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
+  {
+    //Require that the stake index doesn't go out of bounds
+    require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
 
-		//Require that stake is matured
-		require(block.timestamp > m_staked[msg.sender][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
+    //Require that stake is matured
+    require(block.timestamp > m_staked[msg.sender][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
 
     ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
   }
 
-	function ProcessStakeEnding(
+  function ProcessStakeEnding(
     uint256 a_nStakeIndex,
-		address a_address,
-		bool a_bWasForAFriend
+    address a_address,
+    bool a_bWasForAFriend
   ) internal
-	{
-		UpdateDailyData();
+  {
+    UpdateDailyData();
 
     //Get a reference to the stake to save gas from constant map lookups
     StakeStruct storage rStake = m_staked[a_address][a_nStakeIndex];
 
     uint256 tEndTime = block.timestamp > rStake.tEndStakeCommitTime ?
-			rStake.tEndStakeCommitTime : block.timestamp;
+    rStake.tEndStakeCommitTime : block.timestamp;
 
-		//Calculate Payout
-		uint256 nTotalPayout = CalculatePayout(
-			rStake.nSharesStaked,
-			rStake.tLastCompoundedUpdateTime,
-			tEndTime
-		);
+    //Calculate Payout
+    uint256 nTotalPayout = CalculatePayout(
+      rStake.nSharesStaked,
+      rStake.tLastCompoundedUpdateTime,
+      tEndTime
+	);
 
-		//Add any accumulated interest payout from user calling CompoundInterest
-		nTotalPayout = nTotalPayout.add(rStake.nCompoundedPayoutAccumulated);
+    //Add any accumulated interest payout from user calling CompoundInterest
+    nTotalPayout = nTotalPayout.add(rStake.nCompoundedPayoutAccumulated);
 
-		//Add back the original amount staked
-		nTotalPayout = nTotalPayout.add(rStake.nAmountStaked);
+    //Add back the original amount staked
+    nTotalPayout = nTotalPayout.add(rStake.nAmountStaked);
 
-		//Is stake still in the global pool?
-		if(rStake.bIsInGlobalPool)
-		{
-			//Update global staked token tracking
-			m_nTotalStakedTokens = m_nTotalStakedTokens.sub(rStake.nAmountStaked);
+    //Is stake still in the global pool?
+    if(rStake.bIsInGlobalPool)
+    {
+      //Update global staked token tracking
+      m_nTotalStakedTokens = m_nTotalStakedTokens.sub(rStake.nAmountStaked);
 
-			//Update global stake shares tracking
-			m_nTotalStakeShares = m_nTotalStakeShares.sub(rStake.nSharesStaked);
+      //Update global stake shares tracking
+      m_nTotalStakeShares = m_nTotalStakeShares.sub(rStake.nSharesStaked);
 
-			//InterestRateMultiplier
-			m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].sub(rStake.nSharesStaked);
+      //InterestRateMultiplier
+      m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].sub(rStake.nSharesStaked);
 
-			//Set time removed
-			rStake.tTimeRemovedFromGlobalPool = block.timestamp;
+      //Set time removed
+      rStake.tTimeRemovedFromGlobalPool = block.timestamp;
 
-			//Set flag that it is no longer in the global pool
-			rStake.bIsInGlobalPool = false;
+      //Set flag that it is no longer in the global pool
+      rStake.bIsInGlobalPool = false;
 
-			if(a_bWasForAFriend)
-			{
-				emit EndStakeForAFriendEvent(
-					rStake.nSharesStaked,
-					rStake.tEndStakeCommitTime
-				);
-			}
-		}
+      if(a_bWasForAFriend)
+      {
+        emit EndStakeForAFriendEvent(
+		rStake.nSharesStaked,
+		rStake.tEndStakeCommitTime
+	    );
+      }
+    }
 
 		//Calculate penalties if any
 		uint256 nPenalty = 0;
@@ -1329,7 +1329,7 @@ contract CereneumImplementation is CereneumData
     address a_address,
     uint256 a_nStakeIndex
   ) internal
-	{
+  {
     uint256 nEndingIndex = m_staked[a_address].length.sub(1);
 
     //Only copy if we aren't removing the last index
