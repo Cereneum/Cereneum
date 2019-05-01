@@ -164,112 +164,111 @@ using SafeMath for uint256;
 
   function testAdjustStakeFriendlyTime(
     uint256 a_nStakeIndex,
-		uint256 a_days,
-		address a_address
+    uint256 a_days,
+    address a_address
   ) external
-	{
-		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
-		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
-		m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_days.mul(1 days)).sub(60);
-		m_staked[a_address][a_nStakeIndex].tTimeRemovedFromGlobalPool = m_staked[a_address][a_nStakeIndex].tTimeRemovedFromGlobalPool.sub(a_days.mul(1 days)).sub(60);
-		UpdateDailyData();
-	}
+  {
+    m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
+    m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
+    m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_days.mul(1 days)).sub(60);
+    m_staked[a_address][a_nStakeIndex].tTimeRemovedFromGlobalPool = m_staked[a_address][a_nStakeIndex].tTimeRemovedFromGlobalPool.sub(a_days.mul(1 days)).sub(60);
+    UpdateDailyData();
+  }
 
-	function testAdjustStakeTime(
+  function testAdjustStakeTime(
     uint256 a_nStakeIndex,
-		uint256 a_days,
-		address a_address
+    uint256 a_days,
+    address a_address
   ) external
-	{
-		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
-		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
-		m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_days.mul(1 days)).sub(60);
-		UpdateDailyData();
-	}
+  {
+    m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_days.mul(1 days)).sub(60);
+    m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_days.mul(1 days)).sub(60);
+    m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_days.mul(1 days)).sub(60);
+    UpdateDailyData();
+  }
 
-	function testAdjustStakeTimeHours(
+  function testAdjustStakeTimeHours(
     uint256 a_nStakeIndex,
-		uint256 a_hours,
-		address a_address
+    uint256 a_hours,
+    address a_address
   ) external
-	{
-		m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_hours.mul(1 hours));
-		m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_hours.mul(1 hours));
-		m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_hours.mul(1 hours));
-		UpdateDailyData();
-	}
+  {
+    m_staked[a_address][a_nStakeIndex].tLockTime = m_staked[a_address][a_nStakeIndex].tLockTime.sub(a_hours.mul(1 hours));
+    m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime = m_staked[a_address][a_nStakeIndex].tLastCompoundedUpdateTime.sub(a_hours.mul(1 hours));
+    m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime = m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime.sub(a_hours.mul(1 hours));
+    UpdateDailyData();
+  }
 
-	function testFakeClaim(
-		uint256 a_nAmount,
-		address a_address,
-		BlockchainType a_nWhichChain
-	) external
-	{
-		UpdateDailyData();
+  function testFakeClaim(
+    uint256 a_nAmount,
+    address a_address,
+    BlockchainType a_nWhichChain
+  ) external
+  {
+    UpdateDailyData();
 
-		require(m_nTotalRedeemed.add(a_nAmount) <= m_nMaxRedeemable);
+    require(m_nTotalRedeemed.add(a_nAmount) <= m_nMaxRedeemable);
 
-		m_nTotalRedeemed = m_nTotalRedeemed.add(a_nAmount);
+    m_nTotalRedeemed = m_nTotalRedeemed.add(a_nAmount);
 
-		(uint256 nRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
+    (uint256 nRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
 
-		_transfer(address(this), a_address, nRedeemed);
+    _transfer(address(this), a_address, nRedeemed);
 
-		_mint(a_address, nBonuses);
-		_mint(m_genesis, nBonuses);
+    _mint(a_address, nBonuses);
+    _mint(m_genesis, nBonuses);
 
-		m_nRedeemedCount = m_nRedeemedCount.add(1);
+    m_nRedeemedCount = m_nRedeemedCount.add(1);
 
-		return;
-	}
+    return;
+  }
 
-	function testEndStake(
-		uint256 a_nStakeIndex,
-		address a_address
-	) external {
-		ProcessStakeEnding(a_nStakeIndex, a_address, false);
-	}
+  function testEndStake(
+    uint256 a_nStakeIndex,
+    address a_address
+  ) external {
+    ProcessStakeEnding(a_nStakeIndex, a_address, false);
+  }
 
-	function testEndStakeSafely(
-		uint256 a_nStakeIndex,
-		address a_address
-	) external {
-		require(block.timestamp > m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
+  function testEndStakeSafely(
+    uint256 a_nStakeIndex,
+    address a_address
+  ) external {
+    require(block.timestamp > m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
 
-		ProcessStakeEnding(a_nStakeIndex, a_address, false);
-	}
+    ProcessStakeEnding(a_nStakeIndex, a_address, false);
+  }
 
-	function getStakeStructShares(
-		address a_address
-	) public view returns (uint256)
-	{
-		return m_staked[a_address][0].nSharesStaked;
-	}
+  function getStakeStructShares(
+    address a_address
+  ) public view returns (uint256)
+  {
+    return m_staked[a_address][0].nSharesStaked;
+  }
 
-	function getStakeStructAmount(
-		address a_address
-	) public view returns (uint256)
-	{
-		return m_staked[a_address][0].nAmountStaked;
-	}
+  function getStakeStructAmount(
+    address a_address
+  ) public view returns (uint256)
+  {
+    return m_staked[a_address][0].nAmountStaked;
+  }
 
-	function getStakeStructEndTime(
-		address a_address
-	) public view returns (uint256)
-	{
-		return m_staked[a_address][0].tEndStakeCommitTime;
-	}
+  function getStakeStructEndTime(
+    address a_address
+  ) public view returns (uint256)
+  {
+    return m_staked[a_address][0].tEndStakeCommitTime;
+  }
 
-	function getStakeStructLockTime(
-		address a_address
-	) public view returns (uint256)
-	{
-		return m_staked[a_address][0].tLockTime;
-	}
+  function getStakeStructLockTime(
+    address a_address
+  ) public view returns (uint256)
+  {
+    return m_staked[a_address][0].tLockTime;
+  }
 
-	function getBlockTime(
-	) public view returns (uint256)
-	{
-		return block.timestamp;
-	}
+  function getBlockTime() public view returns (uint256)
+  {
+    return block.timestamp;
+  }
 }
