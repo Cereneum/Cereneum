@@ -86,67 +86,67 @@ contract CereneumImplementation is CereneumData
   function TimestampToDaysSinceLaunch(
     uint256 a_tTimestamp
   ) public view returns (uint256)
-	{
+  {
     return (a_tTimestamp.sub(m_tContractLaunchTime).div(1 days));
   }
 
   /// @dev Gets the number of days since the launch of the contract
   /// @return Number of days since contract launch
   function DaysSinceLaunch() public view returns (uint256)
-	{
+  {
     return (TimestampToDaysSinceLaunch(block.timestamp));
   }
 
   /// @dev Checks if we're still in the claimable phase (first 52 weeks)
   /// @return Boolean on if we are still in the claimable phase
   function IsClaimablePhase() public view returns (bool)
-	{
+  {
     return (DaysSinceLaunch() < 364);
   }
 
-	/// @dev The default function for participating in the ETH pool
-	function() external payable
-	{
-		//Require the minimum value for staking
-		require(msg.value >= 0.01 ether, "ETH Sent not above minimum value");
+  /// @dev The default function for participating in the ETH pool
+  function() external payable
+  {
+    //Require the minimum value for staking
+    require(msg.value >= 0.01 ether, "ETH Sent not above minimum value");
 
-		require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Eth Pool staking doesn't begin until after the buffer window");
+    require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Eth Pool staking doesn't begin until after the buffer window");
 
-		UpdateDailyData();
+    UpdateDailyData();
 
-		m_EthereumStakers[msg.sender].push(
+    m_EthereumStakers[msg.sender].push(
       EthStakeStruct(
         msg.value, // Ethereum staked
-				DaysSinceLaunch()	//Day staked
+	DaysSinceLaunch()	//Day staked
       )
     );
 
-		m_nTotalEthStaked = m_nTotalEthStaked.add(msg.value);
+    m_nTotalEthStaked = m_nTotalEthStaked.add(msg.value);
   }
 
-	/// @dev Withdraw CER from the Eth pool after stake has completed
- 	/// @param a_nIndex The index of the stake to be withdrawn
-	function WithdrawFromEthPool(uint256 a_nIndex) public
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_EthereumStakers[msg.sender].length > a_nIndex, "Eth stake does not exist");
+  /// @dev Withdraw CER from the Eth pool after stake has completed
+  /// @param a_nIndex The index of the stake to be withdrawn
+  function WithdrawFromEthPool(uint256 a_nIndex) public
+  {
+    //Require that the stake index doesn't go out of bounds
+    require(m_EthereumStakers[msg.sender].length > a_nIndex, "Eth stake does not exist");
 
-		UpdateDailyData();
+    UpdateDailyData();
 
-		uint256 nDay = m_EthereumStakers[msg.sender][a_nIndex].nDay;
+    uint256 nDay = m_EthereumStakers[msg.sender][a_nIndex].nDay;
 
-		require(nDay < DaysSinceLaunch(), "Must wait until next day to withdraw");
+    require(nDay < DaysSinceLaunch(), "Must wait until next day to withdraw");
 
-		uint256 nAmount = m_EthereumStakers[msg.sender][a_nIndex].nAmount;
+    uint256 nAmount = m_EthereumStakers[msg.sender][a_nIndex].nAmount;
 
-		uint256 nPayoutAmount = m_dailyDataMap[nDay].nPayoutAmount.div(10);	//10%
+    uint256 nPayoutAmount = m_dailyDataMap[nDay].nPayoutAmount.div(10);	//10%
 
-		uint256 nEthPoolPayout = nPayoutAmount.mul(nAmount)
-			.div(m_dailyDataMap[nDay].nTotalEthStaked);
+    uint256 nEthPoolPayout = nPayoutAmount.mul(nAmount)
+	.div(m_dailyDataMap[nDay].nTotalEthStaked);
 
-		_mint(msg.sender, nEthPoolPayout);
+    _mint(msg.sender, nEthPoolPayout);
 
-		uint256 nEndingIndex = m_EthereumStakers[msg.sender].length.sub(1);
+    uint256 nEndingIndex = m_EthereumStakers[msg.sender].length.sub(1);
 
     //Only copy if we aren't removing the last index
     if(nEndingIndex != a_nIndex)
@@ -157,36 +157,36 @@ contract CereneumImplementation is CereneumData
 
     //Lower array length by 1
     m_EthereumStakers[msg.sender].length = nEndingIndex;
-	}
+  }
 
-	/// @dev Transfers ETH in the contract to the genesis address
-	function TransferContractETH() public
+  /// @dev Transfers ETH in the contract to the genesis address
+  function TransferContractETH() public
   {
-  	require(address(this).balance != 0, "No Eth to transfer");
+    require(address(this).balance != 0, "No Eth to transfer");
 
-		require(m_nLastEthWithdrawalTime.add(12 weeks) <= block.timestamp, "Can only withdraw once every 3 months");
+    require(m_nLastEthWithdrawalTime.add(12 weeks) <= block.timestamp, "Can only withdraw once every 3 months");
 
     m_EthGenesis.transfer(address(this).balance);
 
-		m_nLastEthWithdrawalTime = block.timestamp;
+    m_nLastEthWithdrawalTime = block.timestamp;
   }
 
-	/// @dev Updates and stores the global interest for each day.
-	/// Additionally adds the frenzy/prosperous bonuses and the Early/Late unstake penalties.
-	/// This function gets called at the start of popular public functions to continuously update.
+  /// @dev Updates and stores the global interest for each day.
+  /// Additionally adds the frenzy/prosperous bonuses and the Early/Late unstake penalties.
+  /// This function gets called at the start of popular public functions to continuously update.
   function UpdateDailyData() public
-	{
+  {
     for(m_nLastUpdatedDay; DaysSinceLaunch() > m_nLastUpdatedDay; m_nLastUpdatedDay++)
-		{
-			//Gives 5% inflation per 365 days
+    {
+      //Gives 5% inflation per 365 days
       uint256 nPayoutRound = totalSupply().div(7300);
 
       uint256 nUnclaimedCoins = 0;
-    	//Frenzy/Prosperous bonuses and Unclaimed redistribution only available during claims phase.
+      //Frenzy/Prosperous bonuses and Unclaimed redistribution only available during claims phase.
       if(m_nLastUpdatedDay < 364)
-			{
+      {
         nUnclaimedCoins = m_nMaxRedeemable.sub(m_nTotalRedeemed);
-				nUnclaimedCoins = GetRobinHoodMonthlyAmount(nUnclaimedCoins, m_nLastUpdatedDay);
+	nUnclaimedCoins = GetRobinHoodMonthlyAmount(nUnclaimedCoins, m_nLastUpdatedDay);
 
         nPayoutRound = nPayoutRound.add(nUnclaimedCoins);
 
@@ -202,55 +202,55 @@ contract CereneumImplementation is CereneumData
         _mint(m_genesis, nPayoutRound.mul(m_nRedeemedCount).div(m_nUTXOCountAtSnapshot)); // Frenzy
         _mint(m_genesis, nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)); // Prosperous
       }
-			else
-			{
-				//If we are not in the claimable phase anymore apply the voted on interest multiplier
+      else
+      {
+        //If we are not in the claimable phase anymore apply the voted on interest multiplier
 
-				//First we need to check if there is a new "most voted on" multiplier
-				uint8 nVoteMultiplier = 1;
-				uint256 nVoteCount = m_votingMultiplierMap[1];
+	//First we need to check if there is a new "most voted on" multiplier
+	uint8 nVoteMultiplier = 1;
+	uint256 nVoteCount = m_votingMultiplierMap[1];
 
-				for(uint8 i=2; i <= 10; i++)
-				{
-					if(m_votingMultiplierMap[i] > nVoteCount)
-					{
-						nVoteCount = m_votingMultiplierMap[i];
-						nVoteMultiplier = i;
-					}
-				}
+	for(uint8 i=2; i <= 10; i++)
+	{
+		if(m_votingMultiplierMap[i] > nVoteCount)
+		{
+			nVoteCount = m_votingMultiplierMap[i];
+			nVoteMultiplier = i;
+		}
+	}
 
-				nPayoutRound = nPayoutRound.mul(nVoteMultiplier);
+	nPayoutRound = nPayoutRound.mul(nVoteMultiplier);
 
-				//Store last interest multiplier for public viewing
-				m_nInterestMultiplier = nVoteMultiplier;
-			}
+	//Store last interest multiplier for public viewing
+	m_nInterestMultiplier = nVoteMultiplier;
+      }
 
-			//Add nPayoutRound to contract's balance
-			_mint(address(this), nPayoutRound.sub(nUnclaimedCoins));
+      //Add nPayoutRound to contract's balance
+      _mint(address(this), nPayoutRound.sub(nUnclaimedCoins));
 
       //Add early and late unstake pool to payout round
-			if(m_nEarlyAndLateUnstakePool != 0)
-			{
+      if(m_nEarlyAndLateUnstakePool != 0)
+      {
       	nPayoutRound = nPayoutRound.add(m_nEarlyAndLateUnstakePool);
-				//Reset back to 0 for next day
+	//Reset back to 0 for next day
       	m_nEarlyAndLateUnstakePool = 0;
-			}
+      }
 
-    	//Store daily data
+      //Store daily data
       m_dailyDataMap[m_nLastUpdatedDay] = DailyDataStuct(
         nPayoutRound,
         m_nTotalStakeShares,
-				m_nTotalEthStaked
+	m_nTotalEthStaked
       );
 
-			m_nTotalEthStaked = 0;
+      m_nTotalEthStaked = 0;
     }
   }
 
   /// @dev Gets the circulating supply (total supply minus staked coins).
   /// @return Circulating Supply
   function GetCirculatingSupply() external view returns (uint256)
-	{
+  {
     return totalSupply().sub(balanceOf(address(this)));
   }
 
@@ -264,7 +264,7 @@ contract CereneumImplementation is CereneumData
     bytes32 a_hMerkleLeaf,
     BlockchainType a_nWhichChain
   ) public view returns (bool)
-	{
+  {
     require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Invalid blockchain option");
 
     return MerkleProof.verify(a_hMerkleTreeBranches, m_hMerkleTreeRootsArray[uint8(a_nWhichChain)], a_hMerkleLeaf);
@@ -289,7 +289,7 @@ contract CereneumImplementation is CereneumData
     bytes32 a_s,
     BlockchainType a_nWhichChain
   ) public pure returns (bool)
-	{
+  {
     bytes memory addressAsHex = GenerateSignatureMessage(a_addressClaiming, a_nWhichChain);
 
     bytes32 hHash;
@@ -319,8 +319,8 @@ contract CereneumImplementation is CereneumData
     bytes32 a_publicKeyX,
     bytes32 a_publicKeyY
   ) public pure returns (address)
-	{
-		bytes32 hash = keccak256(abi.encodePacked(a_publicKeyX, a_publicKeyY));
+  {
+    bytes32 hash = keccak256(abi.encodePacked(a_publicKeyX, a_publicKeyY));
     return address(uint160(uint256((hash))));
   }
 
@@ -334,17 +334,17 @@ contract CereneumImplementation is CereneumData
     bytes32 a_publicKeyY,
     AddressType a_nAddressType
   ) public pure returns (bytes20)
-	{
+  {
     bytes20 publicKey;
     uint8 initialByte;
     if(a_nAddressType == AddressType.LegacyCompressed || a_nAddressType == AddressType.SegwitCompressed)
-		{
+    {
       //Hash the compressed format
       initialByte = (uint256(a_publicKeyY) & 1) == 0 ? 0x02 : 0x03;
       publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX))));
     }
-		else
-		{
+    else
+    {
       //Hash the uncompressed format
       initialByte = 0x04;
       publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX, a_publicKeyY))));
@@ -364,13 +364,13 @@ contract CereneumImplementation is CereneumData
   /// @param a_address Ethereum address
   /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
   /// @return Correctly formatted message for bitcoin signing
-	function GenerateSignatureMessage(
+  function GenerateSignatureMessage(
     address a_address,
     BlockchainType a_nWhichChain
   ) public pure returns(bytes memory)
-	{
-		bytes16 hexDigits = "0123456789abcdef";
-		bytes memory prefix;
+  {
+    bytes16 hexDigits = "0123456789abcdef";
+    bytes memory prefix;
     uint8 nPrefixLength = 0;
 
     //One of the bitcoin chains
@@ -393,23 +393,23 @@ contract CereneumImplementation is CereneumData
       prefix = "\x19Litecoin Signed Message:\n\x3CClaim_Cereneum_to_0x";
     }
 
-		bytes20 addressBytes = bytes20(a_address);
-		bytes memory message = new bytes(nPrefixLength + 40);
-		uint256 nOffset = 0;
+    bytes20 addressBytes = bytes20(a_address);
+    bytes memory message = new bytes(nPrefixLength + 40);
+    uint256 nOffset = 0;
 
-		for(uint i = 0; i < nPrefixLength; i++)
-		{
-    	message[nOffset++] = prefix[i];
+    for(uint i = 0; i < nPrefixLength; i++)
+    {
+      message[nOffset++] = prefix[i];
     }
 
-		for(uint i = 0; i < 20; i++)
-		{
+    for(uint i = 0; i < 20; i++)
+    {
       message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] >> 4))];
       message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] & 0x0f))];
     }
 
-		return message;
-	}
+    return message;
+  }
 
   /// @dev Validate ECSDA signature was signed by the specified address
   /// @param a_hash Hash of signed data
@@ -425,7 +425,7 @@ contract CereneumImplementation is CereneumData
     bytes32 a_s,
     address a_address
   ) public pure returns (bool)
-	{
+  {
     return ecrecover(
       a_hash,
       a_v,
@@ -444,10 +444,10 @@ contract CereneumImplementation is CereneumData
     bytes32[] memory a_hMerkleTreeBranches,
     BlockchainType a_nWhichChain
   ) public view returns (bool)
-	{
+  {
     //Check that the UTXO has not yet been redeemed and that it exists in the Merkle tree
     return(
-			(m_claimedUTXOsMap[uint8(a_nWhichChain)][a_hMerkleLeafHash] == false) && VerifyProof(a_hMerkleTreeBranches, a_hMerkleLeafHash, a_nWhichChain)
+	(m_claimedUTXOsMap[uint8(a_nWhichChain)][a_hMerkleLeafHash] == false) && VerifyProof(a_hMerkleTreeBranches, a_hMerkleLeafHash, a_nWhichChain)
     );
   }
 
@@ -463,7 +463,7 @@ contract CereneumImplementation is CereneumData
     bytes32[] memory a_hMerkleTreeBranches,
     BlockchainType a_nWhichChain
   ) public view returns (bool)
-	{
+  {
     //Calculate the hash of the Merkle leaf associated with this UTXO
     bytes32 hMerkleLeafHash = keccak256(
       abi.encodePacked(
@@ -476,97 +476,97 @@ contract CereneumImplementation is CereneumData
     return CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain);
   }
 
-	/// @dev Calculates the monthly Robin Hood reward
+  /// @dev Calculates the monthly Robin Hood reward
   /// @param a_nAmount The amount to calculate from
   /// @param a_nDaysSinceLaunch The number of days since contract launch
   /// @return The amount after applying monthly Robin Hood calculation
-	function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+  function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+  {
+	uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+	uint256 nScalar = 400000000000000;	// 0.25%
+	//Month 1 - 0.25% late penalty
+	if(a_nDaysSinceLaunch < 43)
 	{
-		uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-		uint256 nScalar = 400000000000000;	// 0.25%
-		//Month 1 - 0.25% late penalty
-		if(a_nDaysSinceLaunch < 43)
-		{
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 2 - Additional 0.5% penalty
-		// 0.25% + 0.5% = .75%
-		else if(a_nDaysSinceLaunch < 72)
-		{
-			nScalar = 200000000000000;	// 0.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 3 - Additional 0.75% penalty
-		// 0.25% + 0.5% + .75% = 1.5%
-		else if(a_nDaysSinceLaunch < 101)
-		{
-			nScalar = 133333333333333;	// 0.75%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 4 - Additional 1.5%
-		// 0.25% + 0.5% + .75% + 1.5% = 3%
-		else if(a_nDaysSinceLaunch < 130)
-		{
-			nScalar = 66666666666666;	// 1.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 5 - Additional 3%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
-		else if(a_nDaysSinceLaunch < 159)
-		{
-			nScalar = 33333333333333;	// 3%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 6 - Additional 6%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
-		else if(a_nDaysSinceLaunch < 188)
-		{
-			nScalar = 16666666666666;	// 6%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 7 - Additional 8%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
-		else if(a_nDaysSinceLaunch < 217)
-		{
-			nScalar = 12499999999999;	// 8%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 8 - Additional 10%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
-		else if(a_nDaysSinceLaunch < 246)
-		{
-			nScalar = 10000000000000;	// 10%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 9 - Additional 12.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
-		else if(a_nDaysSinceLaunch < 275)
-		{
-			nScalar = 7999999999999;	// 12.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 10 - Additional 15%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
-		else if(a_nDaysSinceLaunch < 304)
-		{
-			nScalar = 6666666666666;	// 15%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 11 - Additional 17.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
-		else if(a_nDaysSinceLaunch < 334)
-		{
-			nScalar = 5714285714290;	// 17.5%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
-		//Month 12 - Additional 25%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
-		else if(a_nDaysSinceLaunch < 364)
-		{
-			nScalar = 4000000000000;	// 25%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
+		return nScaledAmount.div(nScalar.mul(29));
 	}
+	//Month 2 - Additional 0.5% penalty
+	// 0.25% + 0.5% = .75%
+	else if(a_nDaysSinceLaunch < 72)
+	{
+		nScalar = 200000000000000;	// 0.5%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 3 - Additional 0.75% penalty
+	// 0.25% + 0.5% + .75% = 1.5%
+	else if(a_nDaysSinceLaunch < 101)
+	{
+		nScalar = 133333333333333;	// 0.75%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 4 - Additional 1.5%
+	// 0.25% + 0.5% + .75% + 1.5% = 3%
+	else if(a_nDaysSinceLaunch < 130)
+	{
+		nScalar = 66666666666666;	// 1.5%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 5 - Additional 3%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
+	else if(a_nDaysSinceLaunch < 159)
+	{
+		nScalar = 33333333333333;	// 3%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 6 - Additional 6%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
+	else if(a_nDaysSinceLaunch < 188)
+	{
+		nScalar = 16666666666666;	// 6%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 7 - Additional 8%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
+	else if(a_nDaysSinceLaunch < 217)
+	{
+		nScalar = 12499999999999;	// 8%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 8 - Additional 10%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
+	else if(a_nDaysSinceLaunch < 246)
+	{
+		nScalar = 10000000000000;	// 10%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 9 - Additional 12.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
+	else if(a_nDaysSinceLaunch < 275)
+	{
+		nScalar = 7999999999999;	// 12.5%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 10 - Additional 15%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
+	else if(a_nDaysSinceLaunch < 304)
+	{
+		nScalar = 6666666666666;	// 15%
+		return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 11 - Additional 17.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
+	else if(a_nDaysSinceLaunch < 334)
+	{
+		nScalar = 5714285714290;	// 17.5%
+		return nScaledAmount.div(nScalar.mul(30));
+	}
+	//Month 12 - Additional 25%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
+	else if(a_nDaysSinceLaunch < 364)
+	{
+		nScalar = 4000000000000;	// 25%
+		return nScaledAmount.div(nScalar.mul(30));
+	}
+    }
 
 	/// @dev Calculates the monthly late penalty
   /// @param a_nAmount The amount to calculate from
