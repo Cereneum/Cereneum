@@ -503,391 +503,391 @@ contract CereneumImplementation is CereneumData
     /// @param a_nAmount The amount to calculate from
     /// @param a_nDaysSinceLaunch The number of days since contract launch
     /// @return The amount after applying monthly Robin Hood calculation
-  function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
-  {
-      uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-      uint256 nScalar = 400000000000000;	// 0.25%
-      //Month 1 - 0.25% late penalty
-  if(a_nDaysSinceLaunch < 43)
-		{
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 2 - Additional 0.5% penalty
-		// 0.25% + 0.5% = .75%
-		else if(a_nDaysSinceLaunch < 72)
-		{
-			nScalar = 200000000000000;	// 0.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 3 - Additional 0.75% penalty
-		// 0.25% + 0.5% + .75% = 1.5%
-		else if(a_nDaysSinceLaunch < 101)
-		{
-			nScalar = 133333333333333;	// 0.75%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 4 - Additional 1.5%
-		// 0.25% + 0.5% + .75% + 1.5% = 3%
-		else if(a_nDaysSinceLaunch < 130)
-		{
-			nScalar = 66666666666666;	// 1.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 5 - Additional 3%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
-		else if(a_nDaysSinceLaunch < 159)
-		{
-			nScalar = 33333333333333;	// 3%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 6 - Additional 6%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
-		else if(a_nDaysSinceLaunch < 188)
-		{
-			nScalar = 16666666666666;	// 6%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 7 - Additional 8%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
-		else if(a_nDaysSinceLaunch < 217)
-		{
-			nScalar = 12499999999999;	// 8%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 8 - Additional 10%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
-		else if(a_nDaysSinceLaunch < 246)
-		{
-			nScalar = 10000000000000;	// 10%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 9 - Additional 12.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
-		else if(a_nDaysSinceLaunch < 275)
-		{
-			nScalar = 7999999999999;	// 12.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 10 - Additional 15%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
-		else if(a_nDaysSinceLaunch < 304)
-		{
-			nScalar = 6666666666666;	// 15%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 11 - Additional 17.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
-		else if(a_nDaysSinceLaunch < 334)
-		{
-			nScalar = 5714285714290;	// 17.5%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
-		//Month 12 - Additional 25%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
-		else if(a_nDaysSinceLaunch < 364)
-		{
-			nScalar = 4000000000000;	// 25%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
-	}
-
-	/// @dev Calculates the monthly late penalty
-  /// @param a_nAmount The amount to calculate from
-  /// @param a_nDaysSinceLaunch The number of days since contract launch
-  /// @return The amount after applying monthly late penalty
-	function GetMonthlyLatePenalty(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
-	{
-		if(a_nDaysSinceLaunch <= m_nClaimPhaseBufferDays)
-		{
-			return 0;
-		}
-
-		uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-		uint256 nPreviousMonthPenalty = 0;
-		uint256 nScalar = 400000000000000;	// 0.25%
-		//Month 1 - 0.25% late penalty
-		if(a_nDaysSinceLaunch <= 43)
-		{
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(14);
-			return nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-		}
-		//Month 2 - Additional 0.5% penalty
-		// 0.25% + 0.5% = .75%
-		else if(a_nDaysSinceLaunch <= 72)
-		{
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(43);
-			nScalar = 200000000000000;	// 0.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 3 - Additional 0.75% penalty
-		// 0.25% + 0.5% + .75% = 1.5%
-		else if(a_nDaysSinceLaunch <= 101)
-		{
-			nScalar = 133333333333333;	// 0.75%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(72);
-			nScalar = 133333333333333;	// 0.75%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 4 - Additional 1.5%
-		// 0.25% + 0.5% + .75% + 1.5% = 3%
-		else if(a_nDaysSinceLaunch <= 130)
-		{
-			nScalar = 66666666666666;	// 1.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(101);
-			nScalar = 66666666666666;	// 1.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 5 - Additional 3%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
-		else if(a_nDaysSinceLaunch <= 159)
-		{
-			nScalar = 33333333333333;	// 3%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(130);
-			nScalar = 33333333333333;	// 3%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 6 - Additional 6%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
-		else if(a_nDaysSinceLaunch <= 188)
-		{
-			nScalar = 16666666666666;	// 6%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(159);
-			nScalar = 16666666666666;	// 6%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 7 - Additional 8%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
-		else if(a_nDaysSinceLaunch <= 217)
-		{
-			nScalar = 8333333333333;	// 12%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(188);
-			nScalar = 12499999999999;	// 8%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 8 - Additional 10%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
-		else if(a_nDaysSinceLaunch <= 246)
-		{
-			nScalar = 5000000000000;	// 20%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(217);
-			nScalar = 10000000000000;	// 10%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 9 - Additional 12.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
-		else if(a_nDaysSinceLaunch <= 275)
-		{
-			nScalar = 3333333333333;	// 30%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(246);
-			nScalar = 7999999999999;	// 12.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 10 - Additional 15%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
-		else if(a_nDaysSinceLaunch <= 304)
-		{
-			nScalar = 2352941176472;	// 42.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(275);
-			nScalar = 6666666666666;	// 15%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 11 - Additional 17.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
-		else if(a_nDaysSinceLaunch <= 334)
-		{
-			nScalar = 1739130434782;	// 57.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(304);
-			nScalar = 5714285714290;	// 17.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 12 - Additional 25%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
-		else if(a_nDaysSinceLaunch < 364)
-		{
-			nScalar = 1333333333333;	// 75%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(334);
-			nScalar = 4000000000000;	// 25%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		else
-		{
-			return a_nAmount;
-		}
-	}
-
-	/// @dev Returns claim amount with deduction based on weeks since contract launch.
-	/// @param a_nAmount Amount of claim from UTXO
-	/// @return Amount after any late penalties
-	function GetLateClaimAmount(uint256 a_nAmount) internal view returns (uint256)
-	{
-		uint256 nDaysSinceLaunch = DaysSinceLaunch();
-
-		return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, nDaysSinceLaunch));
-	}
-
-  /// @dev Calculates speed bonus for claiming early
-  /// @param a_nAmount Amount of claim from UTXO
-  /// @return Speed bonus amount
-  function GetSpeedBonus(uint256 a_nAmount) internal view returns (uint256)
-	{
-		uint256 nDaysSinceLaunch = DaysSinceLaunch();
-
-		//We give a two week buffer after contract launch before penalties
-		if(nDaysSinceLaunch < m_nClaimPhaseBufferDays)
-		{
-			nDaysSinceLaunch = 0;
-		}
-		else
-		{
-			nDaysSinceLaunch = nDaysSinceLaunch.sub(m_nClaimPhaseBufferDays);
-		}
-
-    uint256 nMaxDays = 350;
-    a_nAmount = a_nAmount.div(5);
-    return a_nAmount.mul(nMaxDays.sub(nDaysSinceLaunch)).div(nMaxDays);
-  }
-
-  /// @dev Gets the redeem amount and bonuses based on time since contract launch
-  /// @param a_nAmount Amount of UTXO in satoshis
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Claim amount, bonuses and penalty
-  function GetRedeemAmount(uint256 a_nAmount, BlockchainType a_nWhichChain) public view returns (uint256, uint256, uint256)
-	{
-    if(a_nWhichChain != BlockchainType.Bitcoin)
+    function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
     {
-      uint8 nWhichChain = uint8(a_nWhichChain);
-      --nWhichChain;
-
-			//Many zeros to avoid rounding errors
-			uint256 nScalar = 100000000000000000;
-
-      uint256 nRatio = nScalar.div(m_blockchainRatios[nWhichChain]);
-
-      //uint256 isnt even close to overflowing with a 100k BTC claim
-			//(100k BTC * 10 * 1e8 = 1e24)
-			//2^256 = 1e77
-			a_nAmount = a_nAmount.mul(1000000000000).div(nRatio);
+        uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+        uint256 nScalar = 400000000000000;	// 0.25%
+        //Month 1 - 0.25% late penalty
+        if(a_nDaysSinceLaunch < 43)
+        {
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 2 - Additional 0.5% penalty
+	// 0.25% + 0.5% = .75%
+	else if(a_nDaysSinceLaunch < 72)
+	{
+	    nScalar = 200000000000000;	// 0.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 3 - Additional 0.75% penalty
+	// 0.25% + 0.5% + .75% = 1.5%
+	else if(a_nDaysSinceLaunch < 101)
+	{
+	    nScalar = 133333333333333;	// 0.75%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 4 - Additional 1.5%
+	// 0.25% + 0.5% + .75% + 1.5% = 3%
+	else if(a_nDaysSinceLaunch < 130)
+	{
+	    nScalar = 66666666666666;	// 1.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 5 - Additional 3%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
+	else if(a_nDaysSinceLaunch < 159)
+	{
+	    nScalar = 33333333333333;	// 3%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 6 - Additional 6%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
+	else if(a_nDaysSinceLaunch < 188)
+	{
+	    nScalar = 16666666666666;	// 6%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 7 - Additional 8%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
+	else if(a_nDaysSinceLaunch < 217)
+	{
+	    nScalar = 12499999999999;	// 8%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 8 - Additional 10%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
+	else if(a_nDaysSinceLaunch < 246)
+	{
+	    nScalar = 10000000000000;	// 10%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 9 - Additional 12.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
+	else if(a_nDaysSinceLaunch < 275)
+	{
+	    nScalar = 7999999999999;	// 12.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 10 - Additional 15%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
+	else if(a_nDaysSinceLaunch < 304)
+	{
+	    nScalar = 6666666666666;	// 15%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 11 - Additional 17.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
+	else if(a_nDaysSinceLaunch < 334)
+	{
+	    nScalar = 5714285714290;	// 17.5%
+	    return nScaledAmount.div(nScalar.mul(30));
+	}
+	//Month 12 - Additional 25%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
+	else if(a_nDaysSinceLaunch < 364)
+	{
+	    nScalar = 4000000000000;	// 25%
+	    return nScaledAmount.div(nScalar.mul(30));
+	}
     }
 
-    uint256 nAmount = GetLateClaimAmount(a_nAmount);
-    uint256 nBonus = GetSpeedBonus(a_nAmount);
-
-    return (nAmount, nBonus, a_nAmount.sub(nAmount));
-  }
-
-	/// @dev Verify claim ownership from signed message
-	/// @param a_nAmount Amount of UTXO claim
-	/// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-	/// @param a_addressClaiming Ethereum address within signed message
-	/// @param a_pubKeyX First half of uncompressed ECDSA public key from signed message
-	/// @param a_pubKeyY Second half of uncompressed ECDSA public key from signed message
-  /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address
-	/// @param a_v v parameter of ECDSA signature
-	/// @param a_r r parameter of ECDSA signature
-	/// @param a_s s parameter of ECDSA signature
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  function ValidateOwnership(
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    address a_addressClaiming,
-    bytes32 a_pubKeyX,
-    bytes32 a_pubKeyY,
-    AddressType a_nAddressType,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    BlockchainType a_nWhichChain
-  ) internal
-	{
-    //Calculate the UTXO Merkle leaf hash for the correct chain
-    bytes32 hMerkleLeafHash;
-    if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin have the same raw address format
+    /// @dev Calculates the monthly late penalty
+    /// @param a_nAmount The amount to calculate from
+    /// @param a_nDaysSinceLaunch The number of days since contract launch
+    /// @return The amount after applying monthly late penalty
+    function GetMonthlyLatePenalty(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
     {
-      hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToBitcoinAddress(a_pubKeyX, a_pubKeyY, a_nAddressType), a_nAmount));
-    }
-    else //Otherwise ETH
-    {
-      hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToEthereumAddress(a_pubKeyX, a_pubKeyY), a_nAmount));
-    }
-
-    //Require that the UTXO can be redeemed
-    require(CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain), "UTXO Cannot be redeemed.");
-
-    //Verify the ECDSA parameters match the signed message
-    require(
-      ECDSAVerify(
-        a_addressClaiming,
-        a_pubKeyX,
-        a_pubKeyY,
-        a_v,
-        a_r,
-        a_s,
-        a_nWhichChain
-      ),
-			"ECDSA verification failed."
-    );
-
-    //Save the UTXO as redeemed in the global map
-    m_claimedUTXOsMap[uint8(a_nWhichChain)][hMerkleLeafHash] = true;
-  }
-
-  /// @dev Claim tokens from a UTXO at snapshot block
-  /// granting CER tokens proportional to amount of UTXO.
-  /// BCH, BSV, ETH & LTC chains get proportional BTC ratio awards.
-  /// @param a_nAmount Amount of UTXO
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_addressClaiming The Ethereum address for the claimed CER tokens to be sent to
-  /// @param a_publicKeyX X parameter of uncompressed ECDSA public key from UTXO
-  /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key from UTXO
-  /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
-  /// @param a_v v parameter of ECDSA signature
-  /// @param a_r r parameter of ECDSA signature
-  /// @param a_s s parameter of ECDSA signature
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @param a_referrer Optional address of referrer. Address(0) for no referral
-  /// @return The number of tokens redeemed, if successful
-  function Claim(
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    address a_addressClaiming,
-    bytes32 a_publicKeyX,
-    bytes32 a_publicKeyY,
-    AddressType a_nAddressType,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    BlockchainType a_nWhichChain,
-    address a_referrer
-  ) public returns (uint256)
+        if(a_nDaysSinceLaunch <= m_nClaimPhaseBufferDays)
 	{
-    //No claims after the first 50 weeks of contract launch
-    require(IsClaimablePhase(), "Claim is outside of claims period.");
+	    return 0;
+	}
 
-    require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Incorrect blockchain value.");
+	uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+	uint256 nPreviousMonthPenalty = 0;
+	uint256 nScalar = 400000000000000;	// 0.25%
+	//Month 1 - 0.25% late penalty
+	if(a_nDaysSinceLaunch <= 43)
+	{
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(14);
+	    return nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	}
+	//Month 2 - Additional 0.5% penalty
+	// 0.25% + 0.5% = .75%
+	else if(a_nDaysSinceLaunch <= 72)
+	{
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(43);
+	    nScalar = 200000000000000;	// 0.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 3 - Additional 0.75% penalty
+	// 0.25% + 0.5% + .75% = 1.5%
+	else if(a_nDaysSinceLaunch <= 101)
+	{
+	    nScalar = 133333333333333;	// 0.75%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(72);
+	    nScalar = 133333333333333;	// 0.75%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 4 - Additional 1.5%
+	// 0.25% + 0.5% + .75% + 1.5% = 3%
+	else if(a_nDaysSinceLaunch <= 130)
+	{
+	    nScalar = 66666666666666;	// 1.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(101);
+	    nScalar = 66666666666666;	// 1.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 5 - Additional 3%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
+	else if(a_nDaysSinceLaunch <= 159)
+	{
+	    nScalar = 33333333333333;	// 3%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(130);
+	    nScalar = 33333333333333;	// 3%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 6 - Additional 6%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
+	else if(a_nDaysSinceLaunch <= 188)
+	{
+	    nScalar = 16666666666666;	// 6%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(159);
+	    nScalar = 16666666666666;	// 6%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 7 - Additional 8%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
+	else if(a_nDaysSinceLaunch <= 217)
+	{
+	    nScalar = 8333333333333;	// 12%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(188);
+	    nScalar = 12499999999999;	// 8%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 8 - Additional 10%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
+	else if(a_nDaysSinceLaunch <= 246)
+	{
+	    nScalar = 5000000000000;	// 20%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(217);
+	    nScalar = 10000000000000;	// 10%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 9 - Additional 12.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
+	else if(a_nDaysSinceLaunch <= 275)
+	{
+	    nScalar = 3333333333333;	// 30%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(246);
+	    nScalar = 7999999999999;	// 12.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 10 - Additional 15%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
+	else if(a_nDaysSinceLaunch <= 304)
+	{
+	    nScalar = 2352941176472;	// 42.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(275);
+	    nScalar = 6666666666666;	// 15%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 11 - Additional 17.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
+	else if(a_nDaysSinceLaunch <= 334)
+	{
+	    nScalar = 1739130434782;	// 57.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(304);
+	    nScalar = 5714285714290;	// 17.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 12 - Additional 25%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
+	else if(a_nDaysSinceLaunch < 364)
+	{
+	    nScalar = 1333333333333;	// 75%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(334);
+	    nScalar = 4000000000000;	// 25%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	else
+	{
+	    return a_nAmount;
+	}
+    }
 
-    require(a_v <= 30 && a_v >= 27, "V parameter is invalid.");
+    /// @dev Returns claim amount with deduction based on weeks since contract launch.
+    /// @param a_nAmount Amount of claim from UTXO
+    /// @return Amount after any late penalties
+    function GetLateClaimAmount(uint256 a_nAmount) internal view returns (uint256)
+    {
+        uint256 nDaysSinceLaunch = DaysSinceLaunch();
+
+	return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, nDaysSinceLaunch));
+    }
+
+    /// @dev Calculates speed bonus for claiming early
+    /// @param a_nAmount Amount of claim from UTXO
+    /// @return Speed bonus amount
+    function GetSpeedBonus(uint256 a_nAmount) internal view returns (uint256)
+    {
+        uint256 nDaysSinceLaunch = DaysSinceLaunch();
+
+	//We give a two week buffer after contract launch before penalties
+	if(nDaysSinceLaunch < m_nClaimPhaseBufferDays)
+	{
+	    nDaysSinceLaunch = 0;
+	}
+	else
+	{
+	    nDaysSinceLaunch = nDaysSinceLaunch.sub(m_nClaimPhaseBufferDays);
+	}
+
+        uint256 nMaxDays = 350;
+        a_nAmount = a_nAmount.div(5);
+        return a_nAmount.mul(nMaxDays.sub(nDaysSinceLaunch)).div(nMaxDays);
+    }
+
+    /// @dev Gets the redeem amount and bonuses based on time since contract launch
+    /// @param a_nAmount Amount of UTXO in satoshis
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Claim amount, bonuses and penalty
+    function GetRedeemAmount(uint256 a_nAmount, BlockchainType a_nWhichChain) public view returns (uint256, uint256, uint256)
+    {
+        if(a_nWhichChain != BlockchainType.Bitcoin)
+        {
+            uint8 nWhichChain = uint8(a_nWhichChain);
+            --nWhichChain;
+
+	    //Many zeros to avoid rounding errors
+	    uint256 nScalar = 100000000000000000;
+
+            uint256 nRatio = nScalar.div(m_blockchainRatios[nWhichChain]);
+
+            //uint256 isnt even close to overflowing with a 100k BTC claim
+	    //(100k BTC * 10 * 1e8 = 1e24)
+	    //2^256 = 1e77
+	    a_nAmount = a_nAmount.mul(1000000000000).div(nRatio);
+        }
+
+        uint256 nAmount = GetLateClaimAmount(a_nAmount);
+        uint256 nBonus = GetSpeedBonus(a_nAmount);
+
+        return (nAmount, nBonus, a_nAmount.sub(nAmount));
+    }
+
+    /// @dev Verify claim ownership from signed message
+    /// @param a_nAmount Amount of UTXO claim
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_addressClaiming Ethereum address within signed message
+    /// @param a_pubKeyX First half of uncompressed ECDSA public key from signed message
+    /// @param a_pubKeyY Second half of uncompressed ECDSA public key from signed message
+    /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    function ValidateOwnership(
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        address a_addressClaiming,
+        bytes32 a_pubKeyX,
+        bytes32 a_pubKeyY,
+        AddressType a_nAddressType,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        BlockchainType a_nWhichChain
+    ) internal
+    {
+        //Calculate the UTXO Merkle leaf hash for the correct chain
+        bytes32 hMerkleLeafHash;
+        if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin have the same raw address format
+        {
+            hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToBitcoinAddress(a_pubKeyX, a_pubKeyY, a_nAddressType), a_nAmount));
+        }
+        else //Otherwise ETH
+        {
+            hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToEthereumAddress(a_pubKeyX, a_pubKeyY), a_nAmount));
+        }
+
+        //Require that the UTXO can be redeemed
+        require(CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain), "UTXO Cannot be redeemed.");
+
+        //Verify the ECDSA parameters match the signed message
+        require(
+            ECDSAVerify(
+                a_addressClaiming,
+                a_pubKeyX,
+                a_pubKeyY,
+                a_v,
+                a_r,
+                a_s,
+                a_nWhichChain
+            ),
+	    "ECDSA verification failed."
+        );
+
+        //Save the UTXO as redeemed in the global map
+        m_claimedUTXOsMap[uint8(a_nWhichChain)][hMerkleLeafHash] = true;
+    }
+
+    /// @dev Claim tokens from a UTXO at snapshot block
+    /// granting CER tokens proportional to amount of UTXO.
+    /// BCH, BSV, ETH & LTC chains get proportional BTC ratio awards.
+    /// @param a_nAmount Amount of UTXO
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_addressClaiming The Ethereum address for the claimed CER tokens to be sent to
+    /// @param a_publicKeyX X parameter of uncompressed ECDSA public key from UTXO
+    /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key from UTXO
+    /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @param a_referrer Optional address of referrer. Address(0) for no referral
+    /// @return The number of tokens redeemed, if successful
+    function Claim(
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        address a_addressClaiming,
+        bytes32 a_publicKeyX,
+        bytes32 a_publicKeyY,
+        AddressType a_nAddressType,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        BlockchainType a_nWhichChain,
+        address a_referrer
+    ) public returns (uint256)
+    {
+        //No claims after the first 50 weeks of contract launch
+        require(IsClaimablePhase(), "Claim is outside of claims period.");
+
+        require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Incorrect blockchain value.");
+
+        require(a_v <= 30 && a_v >= 27, "V parameter is invalid.");
 
     ValidateOwnership(
       a_nAmount,
