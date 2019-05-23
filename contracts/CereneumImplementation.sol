@@ -889,212 +889,212 @@ contract CereneumImplementation is CereneumData
 
         require(a_v <= 30 && a_v >= 27, "V parameter is invalid.");
 
-    ValidateOwnership(
-      a_nAmount,
-      a_hMerkleTreeBranches,
-      a_addressClaiming,
-      a_publicKeyX,
-      a_publicKeyY,
-      a_nAddressType,
-      a_v,
-      a_r,
-      a_s,
-      a_nWhichChain
-    );
+        ValidateOwnership(
+            a_nAmount,
+            a_hMerkleTreeBranches,
+            a_addressClaiming,
+            a_publicKeyX,
+            a_publicKeyY,
+            a_nAddressType,
+            a_v,
+            a_r,
+            a_s,
+            a_nWhichChain
+        );
 
-    UpdateDailyData();
+        UpdateDailyData();
 
-    //Don't allow claims to exceed maximum redeemable, just in case
-    require(m_nTotalRedeemed.add(a_nAmount) <= m_nMaxRedeemable, "Redeem exceeds maximum redeemable.");
+        //Don't allow claims to exceed maximum redeemable, just in case
+        require(m_nTotalRedeemed.add(a_nAmount) <= m_nMaxRedeemable, "Redeem exceeds maximum redeemable.");
 
-    m_nTotalRedeemed = m_nTotalRedeemed.add(a_nAmount);
+        m_nTotalRedeemed = m_nTotalRedeemed.add(a_nAmount);
 
-    (uint256 nTokensRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
+        (uint256 nTokensRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
 
-		//Transfer coins from contracts wallet to claim wallet
-    _transfer(address(this), a_addressClaiming, nTokensRedeemed);
+	//Transfer coins from contracts wallet to claim wallet
+        _transfer(address(this), a_addressClaiming, nTokensRedeemed);
 
-    //Mint speed bonus to claiming address
-    _mint(a_addressClaiming, nBonuses);
-		//Speed bonus matched for genesis address
-    _mint(m_genesis, nBonuses);
+        //Mint speed bonus to claiming address
+        _mint(a_addressClaiming, nBonuses);
+	//Speed bonus matched for genesis address
+        _mint(m_genesis, nBonuses);
 
-    m_nRedeemedCount = m_nRedeemedCount.add(1);
+        m_nRedeemedCount = m_nRedeemedCount.add(1);
 
-    if(a_referrer != address(0))
-		{
-			//Grant 10% bonus token to the person being referred
-			_mint(a_addressClaiming, nTokensRedeemed.div(10));
-			nBonuses = nBonuses.add(nTokensRedeemed.div(10));
+        if(a_referrer != address(0))
+	{
+	    //Grant 10% bonus token to the person being referred
+	    _mint(a_addressClaiming, nTokensRedeemed.div(10));
+	    nBonuses = nBonuses.add(nTokensRedeemed.div(10));
 
-      //Grant 20% bonus of tokens to referrer
-      _mint(a_referrer, nTokensRedeemed.div(5));
+            //Grant 20% bonus of tokens to referrer
+            _mint(a_referrer, nTokensRedeemed.div(5));
 
-			//Match referral bonus for genesis address (20% for referral and 10% for claimer referral = 30%)
-      _mint(m_genesis, nTokensRedeemed.mul(1000000000000).div(3333333333333));
+	    //Match referral bonus for genesis address (20% for referral and 10% for claimer referral = 30%)
+            _mint(m_genesis, nTokensRedeemed.mul(1000000000000).div(3333333333333));
+        }
+
+        emit ClaimEvent(
+            a_nAmount,
+            nTokensRedeemed,
+            nBonuses,
+	    nPenalties,
+            a_referrer != address(0)
+        );
+
+        //Return the number of tokens redeemed
+        return nTokensRedeemed.add(nBonuses);
     }
 
-    emit ClaimEvent(
-      a_nAmount,
-      nTokensRedeemed,
-      nBonuses,
-			nPenalties,
-      a_referrer != address(0)
-    );
+    /// @dev Calculates stake payouts for a given stake
+    /// @param a_nStakeShares Number of shares to calculate payout for
+    /// @param a_tLockTime Starting timestamp of stake
+    /// @param a_tEndTime Ending timestamp of stake
+    /// @return payout amount
+    function CalculatePayout(
+        uint256 a_nStakeShares,
+        uint256 a_tLockTime,
+        uint256 a_tEndTime
+    ) public view returns (uint256)
+    {
+        if(m_nLastUpdatedDay == 0)
+	    return 0;
 
-    //Return the number of tokens redeemed
-    return nTokensRedeemed.add(nBonuses);
-  }
+        uint256 nPayout = 0;
 
-  /// @dev Calculates stake payouts for a given stake
-  /// @param a_nStakeShares Number of shares to calculate payout for
-  /// @param a_tLockTime Starting timestamp of stake
-  /// @param a_tEndTime Ending timestamp of stake
-  /// @return payout amount
-  function CalculatePayout(
-    uint256 a_nStakeShares,
-    uint256 a_tLockTime,
-    uint256 a_tEndTime
-  ) public view returns (uint256)
+	uint256 tStartDay = TimestampToDaysSinceLaunch(a_tLockTime);
+
+        //Calculate what day stake was closed
+        uint256 tEndDay = TimestampToDaysSinceLaunch(a_tEndTime);
+
+        //Iterate through each day and sum up the payout
+        for(uint256 i = tStartDay; i < tEndDay; i++)
 	{
-		if(m_nLastUpdatedDay == 0)
-			return 0;
+            uint256 nDailyPayout = m_dailyDataMap[i].nPayoutAmount.mul(a_nStakeShares)
+                .div(m_dailyDataMap[i].nTotalStakeShares);
 
-    uint256 nPayout = 0;
+            //Keep sum of payouts
+            nPayout = nPayout.add(nDailyPayout);
+        }
 
-		uint256 tStartDay = TimestampToDaysSinceLaunch(a_tLockTime);
-
-    //Calculate what day stake was closed
-    uint256 tEndDay = TimestampToDaysSinceLaunch(a_tEndTime);
-
-    //Iterate through each day and sum up the payout
-    for(uint256 i = tStartDay; i < tEndDay; i++)
-		{
-      uint256 nDailyPayout = m_dailyDataMap[i].nPayoutAmount.mul(a_nStakeShares)
-        .div(m_dailyDataMap[i].nTotalStakeShares);
-
-      //Keep sum of payouts
-      nPayout = nPayout.add(nDailyPayout);
+        return nPayout;
     }
 
-    return nPayout;
-  }
+    /// @dev Updates current amount of stake to apply compounding interest
+    /// @notice This applies all of your earned interest to future payout calculations
+    /// @param a_nStakeIndex index of stake to compound interest for
+    function CompoundInterest(
+        uint256 a_nStakeIndex
+    ) external
+    {
+        require(m_nLastUpdatedDay != 0, "First update day has not finished.");
 
-  /// @dev Updates current amount of stake to apply compounding interest
-	/// @notice This applies all of your earned interest to future payout calculations
-  /// @param a_nStakeIndex index of stake to compound interest for
-  function CompoundInterest(
-		uint256 a_nStakeIndex
-	) external
+        //Get a reference to the stake to save gas from constant map lookups
+        StakeStruct storage rStake = m_staked[msg.sender][a_nStakeIndex];
+
+	require(block.timestamp < rStake.tEndStakeCommitTime, "Stake has already matured.");
+
+	UpdateDailyData();
+
+	uint256 nInterestEarned = CalculatePayout(
+	    rStake.nSharesStaked,
+            rStake.tLastCompoundedUpdateTime,
+	    block.timestamp
+	);
+
+	if(nInterestEarned != 0)
 	{
-		require(m_nLastUpdatedDay != 0, "First update day has not finished.");
+	    rStake.nCompoundedPayoutAccumulated = rStake.nCompoundedPayoutAccumulated.add(nInterestEarned);
+	    rStake.nSharesStaked = rStake.nSharesStaked.add(nInterestEarned);
 
-    //Get a reference to the stake to save gas from constant map lookups
-    StakeStruct storage rStake = m_staked[msg.sender][a_nStakeIndex];
+	    //InterestRateMultiplier votes
+	    m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].add(nInterestEarned);
 
-		require(block.timestamp < rStake.tEndStakeCommitTime, "Stake has already matured.");
+	    m_nTotalStakeShares = m_nTotalStakeShares.add(nInterestEarned);
+	    rStake.tLastCompoundedUpdateTime = block.timestamp;
 
-		UpdateDailyData();
+	    emit CompoundInterestEvent(
+	        nInterestEarned
+	    );
+	}
+    }
 
-		uint256 nInterestEarned = CalculatePayout(
-			rStake.nSharesStaked,
-		  rStake.tLastCompoundedUpdateTime,
-			block.timestamp
-		);
+    /// @dev Starts a stake
+    /// @param a_nAmount Amount of token to stake
+    /// @param a_nDays Number of days to stake
+    /// @param a_nInterestMultiplierVote Pooled interest rate to vote for (1-10 => 5%-50% interest)
+    function StartStake(
+        uint256 a_nAmount,
+        uint256 a_nDays,
+	uint8 a_nInterestMultiplierVote
+    ) external
+    {
+        require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Staking doesn't begin until after the buffer window");
 
-		if(nInterestEarned != 0)
-		{
-			rStake.nCompoundedPayoutAccumulated = rStake.nCompoundedPayoutAccumulated.add(nInterestEarned);
-			rStake.nSharesStaked = rStake.nSharesStaked.add(nInterestEarned);
+        //Verify account has enough tokens
+        require(balanceOf(msg.sender) >= a_nAmount, "Not enough funds for stake.");
 
-			//InterestRateMultiplier votes
-			m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].add(nInterestEarned);
+        //Don't allow 0 amount stakes
+        require(a_nAmount > 0, "Stake amount must be greater than 0");
 
-			m_nTotalStakeShares = m_nTotalStakeShares.add(nInterestEarned);
-			rStake.tLastCompoundedUpdateTime = block.timestamp;
+	require(a_nDays >= 7, "Stake is under the minimum time required.");
 
-			emit CompoundInterestEvent(
-				nInterestEarned
-			);
-		}
-  }
+	require(a_nInterestMultiplierVote >= 1 && a_nInterestMultiplierVote <= 10, "Interest multiplier range is 1-10.");
 
-  /// @dev Starts a stake
-  /// @param a_nAmount Amount of token to stake
-  /// @param a_nDays Number of days to stake
-	/// @param a_nInterestMultiplierVote Pooled interest rate to vote for (1-10 => 5%-50% interest)
-  function StartStake(
-    uint256 a_nAmount,
-    uint256 a_nDays,
-		uint8 a_nInterestMultiplierVote
-  ) external
+	//Calculate Unlock time
+        uint256 tEndStakeCommitTime = block.timestamp.add(a_nDays.mul(1 days));
+
+        //Don't allow stakes over the maximum stake time
+        require(tEndStakeCommitTime <= block.timestamp.add(m_nMaxStakingTime), "Stake time exceeds maximum.");
+
+        UpdateDailyData();
+
+	//Calculate bonus interest for longer stake periods (20% bonus per year)
+	uint256 nSharesModifier = 0;
+
+	//Minimum stake time of 3 months to get amplifier bonus
+	if(a_nDays >= 90)
 	{
-		require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Staking doesn't begin until after the buffer window");
+	    //We can't have a fractional modifier such as .5 so we need to use whole numbers and divide later
+	    nSharesModifier = a_nDays.mul(2000000).div(365);
+	}
 
-    //Verify account has enough tokens
-    require(balanceOf(msg.sender) >= a_nAmount, "Not enough funds for stake.");
+        //50% bonus shares per year of committed stake time
+        uint256 nStakeShares = a_nAmount.add(a_nAmount.mul(nSharesModifier).div(10000000));
 
-    //Don't allow 0 amount stakes
-    require(a_nAmount > 0, "Stake amount must be greater than 0");
+        //Create and store the stake
+        m_staked[msg.sender].push(
+            StakeStruct(
+                a_nAmount, // nAmountStaked
+                nStakeShares, // nSharesStaked
+		0,	//Accumulated Payout from CompoundInterest
+                block.timestamp, // tLockTime
+                tEndStakeCommitTime, // tEndStakeCommitTime
+		block.timestamp, //tLastCompoundedUpdateTime
+                0, // tTimeRemovedFromGlobalPool
+		a_nInterestMultiplierVote,
+		true, // bIsInGlobalPool
+                false // bIsLatePenaltyAlreadyPooled
+            )
+        );
 
-		require(a_nDays >= 7, "Stake is under the minimum time required.");
+        emit StartStakeEvent(
+            a_nAmount,
+            a_nDays
+        );
 
-		require(a_nInterestMultiplierVote >= 1 && a_nInterestMultiplierVote <= 10, "Interest multiplier range is 1-10.");
+	//InterestRateMultiplier
+	m_votingMultiplierMap[a_nInterestMultiplierVote] = m_votingMultiplierMap[a_nInterestMultiplierVote].add(nStakeShares);
 
-		//Calculate Unlock time
-    uint256 tEndStakeCommitTime = block.timestamp.add(a_nDays.mul(1 days));
+        //Globally track staked tokens
+        m_nTotalStakedTokens = m_nTotalStakedTokens.add(a_nAmount);
 
-    //Don't allow stakes over the maximum stake time
-    require(tEndStakeCommitTime <= block.timestamp.add(m_nMaxStakingTime), "Stake time exceeds maximum.");
+        //Globally track staked shares
+        m_nTotalStakeShares = m_nTotalStakeShares.add(nStakeShares);
 
-    UpdateDailyData();
-
-		//Calculate bonus interest for longer stake periods (20% bonus per year)
-		uint256 nSharesModifier = 0;
-
-		//Minimum stake time of 3 months to get amplifier bonus
-		if(a_nDays >= 90)
-		{
-			//We can't have a fractional modifier such as .5 so we need to use whole numbers and divide later
-			nSharesModifier = a_nDays.mul(2000000).div(365);
-		}
-
-    //50% bonus shares per year of committed stake time
-    uint256 nStakeShares = a_nAmount.add(a_nAmount.mul(nSharesModifier).div(10000000));
-
-    //Create and store the stake
-    m_staked[msg.sender].push(
-      StakeStruct(
-        a_nAmount, // nAmountStaked
-        nStakeShares, // nSharesStaked
-				0,	//Accumulated Payout from CompoundInterest
-        block.timestamp, // tLockTime
-        tEndStakeCommitTime, // tEndStakeCommitTime
-				block.timestamp, //tLastCompoundedUpdateTime
-        0, // tTimeRemovedFromGlobalPool
-				a_nInterestMultiplierVote,
-				true, // bIsInGlobalPool
-        false // bIsLatePenaltyAlreadyPooled
-      )
-    );
-
-    emit StartStakeEvent(
-      a_nAmount,
-      a_nDays
-    );
-
-		//InterestRateMultiplier
-		m_votingMultiplierMap[a_nInterestMultiplierVote] = m_votingMultiplierMap[a_nInterestMultiplierVote].add(nStakeShares);
-
-    //Globally track staked tokens
-    m_nTotalStakedTokens = m_nTotalStakedTokens.add(a_nAmount);
-
-    //Globally track staked shares
-    m_nTotalStakeShares = m_nTotalStakeShares.add(nStakeShares);
-
-    //Transfer staked tokens to contract wallet
-    _transfer(msg.sender, address(this), a_nAmount);
-  }
+        //Transfer staked tokens to contract wallet
+        _transfer(msg.sender, address(this), a_nAmount);
+    }
 
   /// @dev Calculates penalty for unstaking late
   /// @param a_tEndStakeCommitTime Timestamp stake matured
