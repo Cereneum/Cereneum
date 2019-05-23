@@ -1321,8 +1321,8 @@ contract CereneumImplementation is CereneumData
 	        rStake.nAmountStaked,
 		nTotalPayout,
                 block.timestamp < rStake.tEndStakeCommitTime ?
-  		DifferenceInDays(rStake.tLockTime, block.timestamp) :
-  			DifferenceInDays(rStake.tLockTime, rStake.tTimeRemovedFromGlobalPool),
+  		    DifferenceInDays(rStake.tLockTime, block.timestamp) :
+  		    DifferenceInDays(rStake.tLockTime, rStake.tTimeRemovedFromGlobalPool),
 		nPenalty,
 		rStake.nSharesStaked,
 		DifferenceInDays(rStake.tLockTime, rStake.tEndStakeCommitTime)
