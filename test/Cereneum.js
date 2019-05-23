@@ -9,6 +9,58 @@ var fETHRatio = 0.04131;
 var fLTCRatio = 0.01612;
 
 contract('Cereneum', (accounts) => {
+  it('TestEthPoolMultipleStakes', async () => {
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+      "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+      "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+      "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      //console.log("balance: " + await cereneumInstance.balanceOf(accounts[0]));
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+      await cereneumInstance.StartEthStake({from:accounts[0], value:20000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:30000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:40000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:50000000000000000});
+
+      await cereneumInstance.testAdjustContractLaunchTime(1);
+
+      assert(5 == parseInt(await cereneumInstance.GetNumberOfEthPoolStakes(accounts[0]),10));
+
+      await cereneumInstance.WithdrawFromEthPool(4);
+      await cereneumInstance.WithdrawFromEthPool(3);
+      await cereneumInstance.WithdrawFromEthPool(2);
+      await cereneumInstance.WithdrawFromEthPool(1);
+      await cereneumInstance.WithdrawFromEthPool(0);
+
+      assert(0 == parseInt(await cereneumInstance.GetNumberOfEthPoolStakes(accounts[0]),10));
+
+      //console.log("balance: " + await cereneumInstance.balanceOf(accounts[0]));
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+      await cereneumInstance.StartEthStake({from:accounts[0], value:20000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:30000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:40000000000000000});
+      await cereneumInstance.StartEthStake({from:accounts[0], value:50000000000000000});
+
+      await cereneumInstance.testAdjustContractLaunchTime(1);
+
+      assert(5 == parseInt(await cereneumInstance.GetNumberOfEthPoolStakes(accounts[0]),10));
+
+      await cereneumInstance.WithdrawFromEthPool(0);
+      await cereneumInstance.WithdrawFromEthPool(0);
+      await cereneumInstance.WithdrawFromEthPool(0);
+      await cereneumInstance.WithdrawFromEthPool(0);
+      await cereneumInstance.WithdrawFromEthPool(0);
+
+      assert(0 == parseInt(await cereneumInstance.GetNumberOfEthPoolStakes(accounts[0]),10));
+
+      //console.log("balance: " + await cereneumInstance.balanceOf(accounts[0]));
+  });
   it('TestEthPool', async () => {
     const cereneumInstance = await Cereneum.new(
       "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
@@ -23,55 +75,53 @@ contract('Cereneum', (accounts) => {
             0
           );
 
-    console.log("balance acct1: " + await cereneumInstance.balanceOf(accounts[1]));
-
     await cereneumInstance.AdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(1, 7, 1, accounts[1]);
+    await cereneumInstance.StartStake(1, 7, 1, {from:accounts[1]});
 
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     //console.log("WithdrawFromEthPool gas: " + await cereneumInstance.WithdrawFromEthPool.estimateGas(0, {from:accounts[0]}));
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
-    await cereneumInstance.sendTransaction({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
     await cereneumInstance.TransferContractETH(); //Remove ETH from contract to genesis address
 
     await cereneumInstance.AdjustContractLaunchTime(1);
     await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
     await cereneumInstance.WithdrawFromEthPool(0);
 
-    console.log("balance acct0: " + await cereneumInstance.balanceOf(accounts[0]));
+    //console.log("balance acct0: " + await cereneumInstance.balanceOf(accounts[0]));
 
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
-    console.log("balance acct1: " + await cereneumInstance.balanceOf(accounts[1]));
+    //console.log("balance acct1: " + await cereneumInstance.balanceOf(accounts[1]));
   });
   it('TestExchangeAirdrop', async () => {
     const cereneumInstance = await Cereneum.new(
@@ -87,31 +137,75 @@ contract('Cereneum', (accounts) => {
       ethRatio = "0.0" + ethRatio;
       ethRatio = parseFloat(ethRatio);
 
+      //Binance
       assert(parseInt(await cereneumInstance.balanceOf("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"),10) == Math.floor(parseInt(8339472538853, 10) * 1.30 * ethRatio), "Binance 1 balance incorrect");
       assert(parseInt(await cereneumInstance.balanceOf("0xD551234Ae421e3BCBA99A0Da6d736074f22192FF"),10) == Math.floor(parseInt(1479588273675, 10) * 1.30 * ethRatio)-1, "Binance 2 balance incorrect");
       assert(parseInt(await cereneumInstance.balanceOf("0x564286362092D8e7936f0549571a803B203aAceD"),10) == Math.floor(parseInt(1113952670976, 10) * 1.30 * ethRatio)-1, "Binance 3 balance incorrect");
       assert(parseInt(await cereneumInstance.balanceOf("0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF"),10) == Math.floor(parseInt(1452680420343, 10) * 1.30 * ethRatio)-1, "Binance 4 balance incorrect");
       assert(parseInt(await cereneumInstance.balanceOf("0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67"),10) == Math.floor(parseInt(235660201854981, 10) * 1.30 * ethRatio)-2, "Binance 6 balance incorrect");
 
+      //Bittrex
+      assert(parseInt(await cereneumInstance.balanceOf("0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98"),10) == Math.floor(parseInt(12123238705510, 10) * 1.30 * ethRatio)-2, "Bittrex 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x66f820a414680B5bcda5eECA5dea238543F42054"),10) == Math.floor(parseInt(130000160894256, 10) * 1.30 * ethRatio)-1, "Bittrex 3 balance incorrect");
+
+      //KuCoin
+      assert(parseInt(await cereneumInstance.balanceOf("0x2B5634C42055806a59e9107ED44D43c426E58258"),10) == Math.floor(parseInt(620244132323, 10) * 1.30 * ethRatio)-1, "KuCoin 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x689C56AEf474Df92D44A1B70850f808488F9769C"),10) == Math.floor(parseInt(1170133827906, 10) * 1.30 * ethRatio)-1, "KuCoin 2 balance incorrect");
+
+      //LAToken
+      assert(parseInt(await cereneumInstance.balanceOf("0x7891b20c690605f4e370d6944c8a5dbfac5a451c"),10) == Math.floor(parseInt(1024359199440, 10) * 1.30 * ethRatio)-2, "LaToken 1 balance incorrect");
+
+      //Huobi Global
+      assert(parseInt(await cereneumInstance.balanceOf("0xDc76CD25977E0a5Ae17155770273aD58648900D3"),10) == Math.floor(parseInt(85086064196888, 10) * 1.30 * ethRatio)-1, "Huobi Global balance incorrect");
+
+      //CoinBene
+      assert(parseInt(await cereneumInstance.balanceOf("0x33683b94334eeBc9BD3EA85DDBDA4a86Fb461405"),10) == Math.floor(parseInt(317547644511, 10) * 1.30 * ethRatio)-2, "CoinBene balance incorrect");
+
       assert(parseInt(await cereneumInstance.balanceOf("0x8eAf4Fec503da352EB66Ef1E2f75C63e5bC635e1"), 10) == Math.floor(parseInt(8339472538853, 10) * .20 * ethRatio) +
         Math.floor(parseInt(1479588273675, 10) * .20 * ethRatio) +
         Math.floor(parseInt(1113952670976, 10) * .20 * ethRatio) +
         Math.floor(parseInt(1452680420343, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(235660201854981, 10) * .20 * ethRatio), "Referral balance incorrect");
+        Math.floor(parseInt(235660201854981, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(12123238705510, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(130000160894256, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(620244132323, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(1170133827906, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(1024359199440, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(85086064196888, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(317547644511, 10) * .20 * ethRatio),
+        "Referral balance incorrect");
       assert(parseInt(await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d"), 10) == Math.floor(parseInt(8339472538853, 10) * .50 * ethRatio) +
       Math.floor(parseInt(1479588273675, 10) * .50 * ethRatio) +
       Math.floor(parseInt(1113952670976, 10) * .50 * ethRatio) +
       Math.floor(parseInt(1452680420343, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(235660201854981, 10) * .50 * ethRatio)-3, "Genesis balance incorrect");
+      Math.floor(parseInt(235660201854981, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(12123238705510, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(130000160894256, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(620244132323, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(1170133827906, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(1024359199440, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(85086064196888, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(317547644511, 10) * .50 * ethRatio)-7,
+      "Genesis balance incorrect");
   });
   it('TestSupply', async () => {
-    const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
     assert(await cereneumInstance.totalSupply() == 19853569666600000);
     assert(await cereneumInstance.GetCirculatingSupply() == 0);
   });
   it('TestRobinHoodBonus', async () => {
-      const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
       var nTotal = 0;
       var nBonus = 0;
@@ -190,7 +284,12 @@ contract('Cereneum', (accounts) => {
       assert(132 == (10000000 - nTotal), "Incorrect number of unclaimed coins remaining");
   });
   it('TestSpeedBonus', async () => {
-      const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
       assert(await cereneumInstance.testGetSpeedBonus(1000, 0) == 200);
       assert(await cereneumInstance.testGetSpeedBonus(1000, 1) == 200);
@@ -210,7 +309,12 @@ contract('Cereneum', (accounts) => {
       assert(await cereneumInstance.testGetSpeedBonus(1000, 52*7) == 0);
   });
   it('TestLateClaimAmount', async () => {
-      const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
       assert(await cereneumInstance.testGetLateClaimAdjustedAmount(10000000, 0) == 10000000); //2 week post launch buffer, no penalty
       assert(await cereneumInstance.testGetLateClaimAdjustedAmount(10000000, 1)  == 10000000);  //2 week post launch buffer, no penalty
@@ -581,7 +685,12 @@ contract('Cereneum', (accounts) => {
       assert(await cereneumInstance.testGetLateClaimAdjustedAmount(10000000, 500) == 0);
   });
   it('TestAddresses', async () => {
-    const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
     assert(await cereneumInstance.PublicKeyToBitcoinAddress(
       "0xfc783c8f9058a315009054745c5e3277aa5f3c073da2c659a2071d88016e7460",
@@ -598,7 +707,12 @@ contract('Cereneum', (accounts) => {
   });
   //BTC addresses starting with "1"
   it('TestBTC-Legacy-ECDSAVerify-Coinomi', async () => {
-    const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
     assert(await cereneumInstance.ECDSAVerify("0xe658d355303e96425c38fb4778a3e8a56f582eb0",
       "0xfc783c8f9058a315009054745c5e3277aa5f3c073da2c659a2071d88016e7460",
@@ -610,7 +724,12 @@ contract('Cereneum', (accounts) => {
   });
   //BTC addresses starting with "1"
   it('TestBTC-Legacy-VerifyProof-Coinomi', async () => {
-    const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
     var proofs = ["0xfb2dd6de126f3934504a6a80014f54ac1e890bf3d38a2f44efb69940483b0165",
                   "0xe1f11ab56e34fa6b8c6927b171913e3535ce4eb77a1abe4e3efe222abdea7832",
@@ -624,7 +743,12 @@ contract('Cereneum', (accounts) => {
   });
   //BTC addresses starting with "1"
   it('TestBTC-Legacy-Claim-Coinomi', async () => {
-    const cereneumInstance = await Cereneum.deployed();
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
     var proofs = ["0xfb2dd6de126f3934504a6a80014f54ac1e890bf3d38a2f44efb69940483b0165",
                   "0xe1f11ab56e34fa6b8c6927b171913e3535ce4eb77a1abe4e3efe222abdea7832",
@@ -1274,7 +1398,7 @@ contract('Cereneum', (accounts) => {
 
     await cereneumInstance.AdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(1200, 350, 1, accounts[1]);
+    await cereneumInstance.StartStake(1200, 350, 1, {from: accounts[1]});
 
     await cereneumInstance.AdjustContractLaunchTime(75);
     await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
@@ -1283,59 +1407,59 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.AdjustContractLaunchTime(75);
     await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 175, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 175, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(10);
     await cereneumInstance.testAdjustStakeTime(0, 10, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 10, accounts[2]);
 
-    await cereneumInstance.CompoundInterest(0, accounts[1]);
-    await cereneumInstance.testEndStake(0, accounts[2]);
+    await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[2]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 165, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 165, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(20);
     await cereneumInstance.testAdjustStakeTime(0, 20, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 20, accounts[2]);
 
-    await cereneumInstance.CompoundInterest(0, accounts[1]);
-    await cereneumInstance.testEndStake(0, accounts[2]);
+    await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[2]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 145, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 145, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(30);
     await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
 
-    await cereneumInstance.CompoundInterest(0, accounts[1]);
-    await cereneumInstance.testEndStake(0, accounts[2]);
+    await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[2]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 115, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 115, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(40);
     await cereneumInstance.testAdjustStakeTime(0, 40, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 40, accounts[2]);
 
-    await cereneumInstance.CompoundInterest(0, accounts[1]);
-    await cereneumInstance.testEndStake(0, accounts[2]);
+    await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[2]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 75, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 75, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(60);
     await cereneumInstance.testAdjustStakeTime(0, 60, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 60, accounts[2]);
 
-    await cereneumInstance.CompoundInterest(0, accounts[1]);
-    await cereneumInstance.testEndStake(0, accounts[2]);
+    await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[2]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 15, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 15, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(15);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
 
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(await cereneumInstance.DaysSinceLaunch() == 364, "Days since launch incorrect")
 
@@ -1354,47 +1478,47 @@ contract('Cereneum', (accounts) => {
 
     assert(nExpectedTotal < nTotal, "Expected total incorrect");
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 75, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 75, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 75, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 75, 1, {from: accounts[2]});
 
     await cereneumInstance.AdjustContractLaunchTime(15);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 60, 1, accounts[1]);
-
-    await cereneumInstance.AdjustContractLaunchTime(15);
-    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
-    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
-
-    await cereneumInstance.testEndStake(0, accounts[1]);
-
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 45, 1, accounts[1]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 60, 1, {from: accounts[1]});
 
     await cereneumInstance.AdjustContractLaunchTime(15);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 30, 1, accounts[1]);
-
-    await cereneumInstance.AdjustContractLaunchTime(15);
-    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
-    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
-
-    await cereneumInstance.testEndStake(0, accounts[1]);
-
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 15, 1, accounts[1]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 45, 1, {from: accounts[1]});
 
     await cereneumInstance.AdjustContractLaunchTime(15);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
 
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 30, 1, {from: accounts[1]});
+
+    await cereneumInstance.AdjustContractLaunchTime(15);
+    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
+    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
+
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 15, 1, {from: accounts[1]});
+
+    await cereneumInstance.AdjustContractLaunchTime(15);
+    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[1]);
+    await cereneumInstance.testAdjustStakeTime(0, 15, accounts[2]);
+
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     //Contract balance should only have rounding error amount
     assert(await cereneumInstance.balanceOf(cereneumInstance.address) < 3000, "Ending contract balance incorrect");
@@ -1532,7 +1656,7 @@ contract('Cereneum', (accounts) => {
     assert(nAccountBalance == parseInt(3000000 * 1.30 * fLTCRatio, 10)+1, "Claim balance incorrect");
     assert(await cereneumInstance.GetCirculatingSupply() == nGenesisBalance + nAccountBalance + nAccount1Balance, "Circulating supply incorrect");
   });
-  it('TestGasPrices', async () => {
+  it('TestSelfReferralBonus', async () => {
     const cereneumInstance = await Cereneum.new(
       "0x4d1e253b49710ff89e14fd73dd144ca1c82dce935022d3f4aa39a056c955b6b9",
       "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
@@ -1563,18 +1687,6 @@ contract('Cereneum', (accounts) => {
                     "0x5b13d34d88c50cbd9e2768d1b5145d39e99c9bb056bd2948a72c787416d312a2",
                     "0xb380b61545593e3f58a3f70a776c0d35d6bd0db1d04433586f7d8bf4f4235a17"];
 
-    console.log("Claim gas: " + await cereneumInstance.Claim.estimateGas(3000000,
-        proofs,
-        "0xE658D355303e96425c38FB4778a3E8a56F582Eb0",
-        "0x5d246bca8303fcfda5e7e97acfd936fd322bfccde4d426f24e9ea724caad44a4",
-        "0x98b24d98080e57f5e478fac08dafbbb7a9767eade1c2be5ce2ecb2d0742100ad",
-        1,
-        28,
-        "0x2f316e1280923a89189bd7738bfbc605973f304f001235bbc5544af9e5ac333e",
-        "0x76449c6759e1902d0fc4ffaa80f5de90611a04d8c8958059e5d589275477526d",
-        4,
-        accounts[1], {from:accounts[0]}));
-
     var receiptObject = await cereneumInstance.Claim(
           3000000,
           proofs,
@@ -1586,85 +1698,30 @@ contract('Cereneum', (accounts) => {
           "0x2f316e1280923a89189bd7738bfbc605973f304f001235bbc5544af9e5ac333e",
           "0x76449c6759e1902d0fc4ffaa80f5de90611a04d8c8958059e5d589275477526d",
           4,
-          accounts[1]
+          "0xE658D355303e96425c38FB4778a3E8a56F582Eb0"
     );
 
-    //console.log("UpdateDailyData gas: " + await cereneumInstance.UpdateDailyData.estimateGas({from:accounts[0]}));
+    var sReceipt = JSON.stringify(receiptObject, null, 4);
+    var jsonReceipt = JSON.parse(sReceipt);
+    var logs = jsonReceipt.receipt.logs;
+    for(var i=0; i < logs.length; ++i)
+    {
+      if(logs[i].event == "ClaimEvent")
+      {
+          assert(3000000 == parseInt(logs[i].args[0], 16));
+          assert(Math.floor(3000000 * fLTCRatio) == parseInt(logs[i].args[1], 16), "incorrect claim amount");
+          assert(Math.floor(3000000 * .30 * fLTCRatio)+1 == parseInt(logs[i].args[2], 16), "20% speed bonus + 10% referral bonus failed");  //day 1 redeem gets 20% bonus
+          assert(0 == parseInt(logs[i].args[3], 16), "Penalty incorrect");
+          assert(true == logs[i].args[4], "referrer incorrect");
+      }
+    }
 
-    //console.log("AdjustContractLaunchTime gas: " + await cereneumInstance.AdjustContractLaunchTime.estimateGas(1, {from:accounts[0]}));
+    var nGenesisBalance = parseInt(await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d"), 10);
+    var nAccountBalance = parseInt(await cereneumInstance.balanceOf("0xE658D355303e96425c38FB4778a3E8a56F582Eb0"), 10);
 
-    //await cereneumInstance.AdjustContractLaunchTime(1);
-
-    //console.log("UpdateDailyData gas: " + await cereneumInstance.UpdateDailyData.estimateGas({from:accounts[0]}));
-
-    //await cereneumInstance.UpdateDailyData();
-
-    //console.log("UpdateDailyData gas: " + await cereneumInstance.UpdateDailyData.estimateGas({from:accounts[0]}));
-
-    //await cereneumInstance.AdjustContractLaunchTime(2);
-
-    //console.log("UpdateDailyData gas: " + await cereneumInstance.UpdateDailyData.estimateGas({from:accounts[0]}));
-
-    //await cereneumInstance.UpdateDailyData();
-
-    //console.log("Claim gas: " + await cereneumInstance.testFakeClaim.estimateGas(100000, accounts[1], 0, {from:accounts[0]}));
-    //console.log("Claim 300000 gas: " + await cereneumInstance.testFakeClaim.estimateGas(300000, accounts[1], 0, {from:accounts[0]}));
-
-    //console.log("StartStake 7 day gas: " + await cereneumInstance.StartStake.estimateGas(10000, 7, 1, accounts[1], {from:accounts[0]}));
-    //console.log("StartStake 365 day gas: " + await cereneumInstance.StartStake.estimateGas(10000, 365, 1, accounts[1], {from:accounts[0]}));
-
-    //await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
-    //console.log("CompoundInterest gas: " + await cereneumInstance.CompoundInterest.estimateGas(0, accounts[1], {from:accounts[0]}));
-
-    //await cereneumInstance.testAdjustContractLaunchTime(1);
-    //await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
-    //console.log("CompoundInterest gas: " + await cereneumInstance.CompoundInterest.estimateGas(0, accounts[1], {from:accounts[0]}));
-    //await cereneumInstance.testAdjustContractLaunchTime(5);
-    //await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
-    //await cereneumInstance.CompoundInterest(0, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(1);
-    //await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
-    //await cereneumInstance.UpdateDailyData();
-    //console.log("EndStakeSafely gas: " + await cereneumInstance.testEndStakeSafely.estimateGas(0, accounts[1], {from:accounts[0]}));
-    //await cereneumInstance.testEndStakeSafely(0, accounts[1]);
-
-    //await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(64);
-    //await cereneumInstance.testAdjustStakeTime(0, 64, accounts[1]);
-    //console.log("CompoundInterest gas: " + await cereneumInstance.CompoundInterest.estimateGas(0, accounts[1], {from:accounts[0]}));
-    //await cereneumInstance.CompoundInterest(0, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(1);
-    //await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
-    //console.log("EndStakeSafely gas: " + await cereneumInstance.testEndStakeSafely.estimateGas(0, accounts[1], {from:accounts[0]}));
-    //await cereneumInstance.testEndStakeSafely(0, accounts[1]);
-
-    //await cereneumInstance.AdjustContractLaunchTime(30);
-
-    //console.log("UpdateDailyData gas: " + await cereneumInstance.UpdateDailyData.estimateGas({from:accounts[0]}));
-
-    //await cereneumInstance.UpdateDailyData();
-
-    //await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(75);
-    //await cereneumInstance.testAdjustStakeTime(0, 75, accounts[1]);
-    //await cereneumInstance.testAdjustContractLaunchTime(65);
-    //await cereneumInstance.testAdjustStakeTime(0, 65, accounts[1]);
-    //await cereneumInstance.UpdateDailyData();
-    //console.log("EndStakeSafely gas (365 days no daily update cost): " + await cereneumInstance.testEndStakeSafely.estimateGas(0, accounts[1], {from:accounts[0]}));
+    assert(nGenesisBalance == parseInt(3000000 * 0.50 * fLTCRatio, 10), "Genesis balance incorrect");
+    assert(nAccountBalance == parseInt(3000000 * 1.50 * fLTCRatio, 10), "Claim balance incorrect");
+    assert(await cereneumInstance.GetCirculatingSupply() == nGenesisBalance + nAccountBalance, "Circulating supply incorrect");
   });
   //Test that voting phase works properly before claims phase
   it('TestStakeVotingClaimsPeriod', async () => {
@@ -1697,7 +1754,7 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
     //Vote for 10x multiplier
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 7, 10, accounts[1]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 7, 10, {from: accounts[1]});
 
     var nTotalSupply = (parseInt(nSatoshiAmountAtLaunch,10) + parseInt(nClaimAmount*.4,10) + parseInt(nClaimAmount*.4,10));
 
@@ -1789,7 +1846,7 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.getStakeStructEndTime(accounts[1])
     );
 
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
     var nBalanceAfterStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -1832,7 +1889,7 @@ contract('Cereneum', (accounts) => {
     var nCirculatingSupply = parseInt(await cereneumInstance.totalSupply(), 10);
 
     //Vote for 10x multiplier
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 7, 10, accounts[1]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 7, 10, {from: accounts[1]});
 
     for(var i=1; i <= 10; i++)
     {
@@ -1877,7 +1934,7 @@ contract('Cereneum', (accounts) => {
 
     await cereneumInstance.testAdjustContractLaunchTime(6);
     await cereneumInstance.testAdjustStakeTime(0, 6, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
     var nBalanceAfterStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -1886,7 +1943,7 @@ contract('Cereneum', (accounts) => {
     //Get new circulating supply
     nCirculatingSupply = parseInt(await cereneumInstance.totalSupply(), 10);
     //Vote for 5x multiplier with less tokens
-    await cereneumInstance.StartStake(100, 7, 5, accounts[1]);
+    await cereneumInstance.StartStake(100, 7, 5, {from: accounts[1]});
 
     for(var i=1; i <= 10; i++)
     {
@@ -1925,7 +1982,7 @@ contract('Cereneum', (accounts) => {
 
     await cereneumInstance.testAdjustContractLaunchTime(7);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
     assert(await cereneumInstance.m_nInterestMultiplier() == 5, "nInterestMultiplier not 5");
 
@@ -1936,7 +1993,7 @@ contract('Cereneum', (accounts) => {
     //Get new circulating supply
     nCirculatingSupply = parseInt(await cereneumInstance.totalSupply(),10);
     //Vote for 1x multiplier with less tokens
-    await cereneumInstance.StartStake(10, 7, 1, accounts[1]);
+    await cereneumInstance.StartStake(10, 7, 1, {from: accounts[1]});
 
     for(var i=1; i <= 10; i++)
     {
@@ -1975,7 +2032,7 @@ contract('Cereneum', (accounts) => {
 
     await cereneumInstance.testAdjustContractLaunchTime(7);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
     assert(await cereneumInstance.m_nInterestMultiplier() == 1, "nInterestMultiplier not 1");
 
@@ -1987,10 +2044,10 @@ contract('Cereneum', (accounts) => {
     nCirculatingSupply = parseInt(await cereneumInstance.totalSupply(),10);
 
     //Vote for 2x multiplier with less tokens
-    await cereneumInstance.StartStake(10, 7, 2, accounts[1]);
+    await cereneumInstance.StartStake(10, 7, 2, {from: accounts[1]});
 
     //Vote for 7x multiplier with more tokens
-    await cereneumInstance.StartStake(11, 7, 7, accounts[2]);
+    await cereneumInstance.StartStake(11, 7, 7, {from: accounts[2]});
 
     for(var i=1; i <= 10; i++)
     {
@@ -2034,8 +2091,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustContractLaunchTime(7);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(await cereneumInstance.m_nInterestMultiplier() == 7, "nInterestMultiplier not 7");
 
@@ -2047,10 +2104,10 @@ contract('Cereneum', (accounts) => {
     nCirculatingSupply = parseInt(await cereneumInstance.totalSupply(),10);
 
     //Vote for 4x multiplier
-    await cereneumInstance.StartStake(100, 7, 4, accounts[1]);
+    await cereneumInstance.StartStake(100, 7, 4, {from: accounts[1]});
 
     //Vote for 9x multiplier with same tokens but more shares
-    await cereneumInstance.StartStake(100, 90, 9, accounts[2]);
+    await cereneumInstance.StartStake(100, 90, 9, {from: accounts[2]});
 
     for(var i=1; i <= 10; i++)
     {
@@ -2094,7 +2151,7 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustContractLaunchTime(7);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
     //await cereneumInstance.testEndStakeSafely(0, accounts[2]);
 
     assert(await cereneumInstance.m_nInterestMultiplier() == 9,  "nInterestMultiplier not 9");
@@ -2129,7 +2186,7 @@ contract('Cereneum', (accounts) => {
 
       //Stake 10000 coins for 7 days
       var nStakeAmount = 0;
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2161,7 +2218,7 @@ contract('Cereneum', (accounts) => {
       );
 
       //Stake should now have completed
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
       assert(parseInt(nBalanceAfterEndStake,10) == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
@@ -2189,7 +2246,7 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
     var nStakeAmount = 0;
-    var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[2]);
+    var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[2]});
     var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
     jsonReceipt = JSON.parse(sStakeReceipt);
     logs = jsonReceipt.receipt.logs;
@@ -2222,7 +2279,7 @@ contract('Cereneum', (accounts) => {
     var nAmountAfterLatePenalty = Math.floor(parseInt(nPayout, 10) * .99);
 
     //Stake should now have completed
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
     var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[2]);
 
     assert((parseInt(nBalanceAfterEndStake,10)-1) == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
@@ -2249,7 +2306,7 @@ contract('Cereneum', (accounts) => {
       //Adjust 14 days for buffer window after launch
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 365, 1, accounts[3]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[3]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2268,8 +2325,7 @@ contract('Cereneum', (accounts) => {
 
       var nGenesisAddressBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
-      //Stake should now have completed
-      await cereneumInstance.testEndStake(0, accounts[3]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[3]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[3]);
 
@@ -2301,7 +2357,7 @@ contract('Cereneum', (accounts) => {
       //Adjust 14 days for buffer window after launch
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[3]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[3]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2320,7 +2376,7 @@ contract('Cereneum', (accounts) => {
 
       var nGenesisAddressBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
-      await cereneumInstance.testEndStake(0, accounts[3]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[3]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[3]);
 
@@ -2352,7 +2408,7 @@ contract('Cereneum', (accounts) => {
       //Adjust 14 days for buffer window after launch
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 365*5, 1, accounts[3]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 365*5, 1, {from: accounts[3]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2371,8 +2427,7 @@ contract('Cereneum', (accounts) => {
 
       var nGenesisAddressBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
-      //Stake should now have completed
-      await cereneumInstance.testEndStake(0, accounts[3]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[3]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[3]);
 
@@ -2409,7 +2464,7 @@ contract('Cereneum', (accounts) => {
       //Move time back 23 hours
       await cereneumInstance.testAdjustContractLaunchTimeHours(23);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2449,7 +2504,7 @@ contract('Cereneum', (accounts) => {
 
       var nGenesisAddressBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -2500,8 +2555,8 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*2, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*2, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2514,8 +2569,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0,  {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2560,8 +2615,8 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*3, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*3, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2574,8 +2629,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2620,8 +2675,8 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*4, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*4, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2634,8 +2689,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2687,9 +2742,9 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*2, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*2, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2704,8 +2759,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[3]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2757,9 +2812,9 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*3, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*3, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2774,8 +2829,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[3]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2827,9 +2882,9 @@ contract('Cereneum', (accounts) => {
     //Adjust for buffer window
     await cereneumInstance.testAdjustContractLaunchTime(14);
 
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*4, 1, accounts[1]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*4, 1, {from: accounts[1]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+    await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
     for(var p=0; p<12; ++p)
     {
@@ -2844,8 +2899,8 @@ contract('Cereneum', (accounts) => {
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
     await cereneumInstance.testAdjustStakeTime(0, 5, accounts[3]);
 
-    await cereneumInstance.testEndStake(0, accounts[1]);
-    await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+    await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+    await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
     assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -2884,7 +2939,7 @@ contract('Cereneum', (accounts) => {
 
       var nStakeAmount = 0;
       var nStakePeriods = 60;
-      var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -2906,22 +2961,22 @@ contract('Cereneum', (accounts) => {
       for(var p=0; p<2; ++p)
       {
         var nStakeAmt = await cereneumInstance.balanceOf(accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, {from: accounts[2]});
         await cereneumInstance.testAdjustContractLaunchTime(30);
         await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
         if(p==1)
-          await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+          await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
         else
-          await cereneumInstance.CompoundInterest(0, accounts[1]);
+          await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
       }
 
       //Accounts should have equal balance
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) == parseInt(await cereneumInstance.balanceOf(accounts[2]),10));
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), nStakePeriods, 1, accounts[2]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), nStakePeriods, 1, {from: accounts[2]});
 
       for(var p=0; p<2; ++p)
       {
@@ -2929,10 +2984,10 @@ contract('Cereneum', (accounts) => {
         await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
         if(p==0)  //Only compound interest once on purpose
-          await cereneumInstance.CompoundInterest(0, accounts[1]);
+          await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
       }
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       //Account1 should have higher balance since it compounded interest once
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) > parseInt(await cereneumInstance.balanceOf(accounts[2]),10));
@@ -2981,9 +3036,9 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
       for(var p=0; p<12; ++p)
       {
@@ -2998,8 +3053,8 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
       await cereneumInstance.testAdjustStakeTime(0, 5, accounts[3]);
 
-      await cereneumInstance.testEndStake(0, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
   });
@@ -3047,9 +3102,9 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*2, 1, accounts[2]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*2, 1, {from: accounts[2]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
       for(var p=0; p<24; ++p)
       {
@@ -3084,8 +3139,8 @@ contract('Cereneum', (accounts) => {
         assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
       }
 
-      await cereneumInstance.testEndStake(0, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
       assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3134,9 +3189,9 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*3, 1, accounts[2]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*3, 1, {from: accounts[2]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
       for(var p=0; p<36; ++p)
       {
@@ -3171,8 +3226,8 @@ contract('Cereneum', (accounts) => {
         assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
       }
 
-      await cereneumInstance.testEndStake(0, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
       assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3221,9 +3276,9 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*4, 1, accounts[2]);
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365*4, 1, {from: accounts[2]});
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
       for(var p=0; p<48; ++p)
       {
@@ -3258,8 +3313,8 @@ contract('Cereneum', (accounts) => {
         assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
       }
 
-      await cereneumInstance.testEndStake(0, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
       assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3302,8 +3357,8 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3316,8 +3371,8 @@ contract('Cereneum', (accounts) => {
         await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
     });
@@ -3366,9 +3421,9 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3400,13 +3455,13 @@ contract('Cereneum', (accounts) => {
 
         if(nEarlyPenalty != nMinimumPenalty)
         {
-          console.log("nEarlyPenalty: " + nEarlyPenalty);
-          console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
+          //console.log("nEarlyPenalty: " + nEarlyPenalty);
+          //console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
           assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
         }
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3456,9 +3511,9 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3490,14 +3545,14 @@ contract('Cereneum', (accounts) => {
 
         if(nEarlyPenalty != nMinimumPenalty)
         {
-          console.log("nEarlyPenalty: " + nEarlyPenalty);
-          console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
+          //console.log("nEarlyPenalty: " + nEarlyPenalty);
+          //console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
           //Off by one rounding error here
           assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
         }
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3547,9 +3602,9 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3584,8 +3639,8 @@ contract('Cereneum', (accounts) => {
           assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
         }
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3635,9 +3690,9 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3669,13 +3724,13 @@ contract('Cereneum', (accounts) => {
 
         if(nEarlyPenalty != nMinimumPenalty)
         {
-          console.log("nEarlyPenalty: " + nEarlyPenalty);
-          console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
+          //console.log("nEarlyPenalty: " + nEarlyPenalty);
+          //console.log("Math.floor((parseInt(nPayout,10))*.75): " + Math.floor((parseInt(nPayout,10))*.75));
           assert(parseInt(nEarlyPenalty,10) == Math.floor((parseInt(nPayout,10))*.75), "Early Penalty not correct");
         }
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(await cereneumInstance.balanceOf(accounts[1]) == (parseInt(nBalanceAfterClaim,10) + parseInt(nPayout,10) - parseInt(nEarlyPenalty,10)), "Balance 1 incorrect");
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
@@ -3725,9 +3780,9 @@ contract('Cereneum', (accounts) => {
         //Adjust for buffer window
         await cereneumInstance.testAdjustContractLaunchTime(14);
 
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, accounts[1]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, accounts[2]);
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, accounts[3]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365*5, 1, {from: accounts[1]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 365, 1, {from: accounts[2]});
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[3]), 365*5, 1, {from: accounts[3]});
 
         for(var p=0; p<12; ++p)
         {
@@ -3742,8 +3797,8 @@ contract('Cereneum', (accounts) => {
         await cereneumInstance.testAdjustStakeTime(0, 5, accounts[2]);
         await cereneumInstance.testAdjustStakeTime(0, 5, accounts[3]);
 
-        await cereneumInstance.testEndStake(0, accounts[1]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Balance 1 greater than balance 2");
     });
@@ -3775,7 +3830,7 @@ contract('Cereneum', (accounts) => {
         //Stake 10000 coins for 7 days
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(10000, nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(10000, nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -3818,7 +3873,7 @@ contract('Cereneum', (accounts) => {
         );
 
         //Stake should now have completed
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
         var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
         assert(nBalanceAfterEndStake == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
@@ -3861,7 +3916,7 @@ contract('Cereneum', (accounts) => {
         //Stake 10000 coins for 7 days
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(10000, nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(10000, nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -3880,7 +3935,7 @@ contract('Cereneum', (accounts) => {
         var nBalanceAfterStake = await cereneumInstance.balanceOf(accounts[1]);
         assert(nBalanceAfterStake == (nBalanceAfterClaim - nStakeAmount));
 
-        await cereneumInstance.StartStake(10000, nStakePeriods, 1, accounts[2]);
+        await cereneumInstance.StartStake(10000, nStakePeriods, 1, {from: accounts[2]});
 
         var nAdjustedDays = 7;
         var nWeeks = 52;
@@ -3911,13 +3966,13 @@ contract('Cereneum', (accounts) => {
         //console.log("Payout: " + nPayout);
 
         //Stake should now have completed
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
         var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
         assert(nBalanceAfterEndStake == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
           parseInt(nPayout, 10)), "nBalanceAfterEndStake incorrect");
 
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
         var nBalanceAccountTwoAfterEndStake = await cereneumInstance.balanceOf(accounts[2]);
 
         assert(nBalanceAccountTwoAfterEndStake == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
@@ -3966,7 +4021,7 @@ contract('Cereneum', (accounts) => {
         //Stake 10000 coins for 365 days
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -3990,22 +4045,22 @@ contract('Cereneum', (accounts) => {
         {
           var nStakeAmt = await cereneumInstance.balanceOf(accounts[2]);
           //console.log("Starting stake of " + nStakeAmt + " for " + 30 + " days on accounts[2].");
-          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, accounts[2]);
+          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, {from: accounts[2]});
           await cereneumInstance.testAdjustContractLaunchTime(30);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
-          await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+          await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
         }
 
         var nAmt = await cereneumInstance.balanceOf(accounts[2]);
         //console.log("Starting stake of " + nAmt + " for " + 5 + " days on accounts[2].");
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, {from: accounts[2]});
         await cereneumInstance.testAdjustContractLaunchTime(7);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) < parseInt(await cereneumInstance.balanceOf(accounts[2]),10), "Account1 greater than account 2");
 
@@ -4051,7 +4106,7 @@ contract('Cereneum', (accounts) => {
 
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -4075,23 +4130,23 @@ contract('Cereneum', (accounts) => {
         {
           var nStakeAmt = await cereneumInstance.balanceOf(accounts[2]);
           //console.log("Starting stake of " + nStakeAmt + " for " + 30 + " days on accounts[2].");
-          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, accounts[2]);
+          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, {from: accounts[2]});
           await cereneumInstance.testAdjustContractLaunchTime(30);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
-          await cereneumInstance.testEndStakeSafely(0, accounts[2]);
-          await cereneumInstance.CompoundInterest(0, accounts[1]);
+          await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
+          await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
         }
 
         var nAmt = await cereneumInstance.balanceOf(accounts[2]);
         //console.log("Starting stake of " + nAmt + " for " + 5 + " days on accounts[2].");
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, {from: accounts[2]});
         await cereneumInstance.testAdjustContractLaunchTime(7);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]), 10) > parseInt(await cereneumInstance.balanceOf(accounts[2]), 10));
 
@@ -4142,7 +4197,7 @@ contract('Cereneum', (accounts) => {
 
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -4166,23 +4221,23 @@ contract('Cereneum', (accounts) => {
         {
           var nStakeAmt = await cereneumInstance.balanceOf(accounts[2]);
           //console.log("Starting stake of " + nStakeAmt + " for " + 30 + " days on accounts[2].");
-          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, accounts[2]);
+          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, {from: accounts[2]});
           await cereneumInstance.testAdjustContractLaunchTime(30);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
-          await cereneumInstance.CompoundInterest(0, accounts[1]);
-          await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+          await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
+          await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
         }
 
         var nAmt = await cereneumInstance.balanceOf(accounts[2]);
         //console.log("Starting stake of " + nAmt + " for " + 5 + " days on accounts[2].");
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, {from: accounts[2]});
         await cereneumInstance.testAdjustContractLaunchTime(7);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]), 10) > parseInt(await cereneumInstance.balanceOf(accounts[2]), 10));
 
@@ -4242,11 +4297,11 @@ contract('Cereneum', (accounts) => {
           await cereneumInstance.testAdjustContractLaunchTime(30);
 
         //Have 3rd account soak up most of the rewards
-        await cereneumInstance.StartStake(nClaimAmount, 365, 1, accounts[3]);
+        await cereneumInstance.StartStake(nClaimAmount, 365, 1, {from: accounts[3]});
 
         var nStakeAmount = 0;
         var nStakePeriods = 365;
-        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, accounts[1]);
+        var stakeReceipt = await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), nStakePeriods, 1, {from: accounts[1]});
         var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
         jsonReceipt = JSON.parse(sStakeReceipt);
         logs = jsonReceipt.receipt.logs;
@@ -4270,23 +4325,23 @@ contract('Cereneum', (accounts) => {
         {
           var nStakeAmt = await cereneumInstance.balanceOf(accounts[2]);
           //console.log("Starting stake of " + nStakeAmt + " for " + 30 + " days on accounts[2].");
-          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, accounts[2]);
+          await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 30, 1, {from: accounts[2]});
           await cereneumInstance.testAdjustContractLaunchTime(30);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[1]);
           await cereneumInstance.testAdjustStakeTime(0, 30, accounts[2]);
-          await cereneumInstance.testEndStakeSafely(0, accounts[2]);
-          await cereneumInstance.CompoundInterest(0, accounts[1]);
+          await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
+          await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
         }
 
         var nAmt = await cereneumInstance.balanceOf(accounts[2]);
         //console.log("Starting stake of " + nAmt + " for " + 5 + " days on accounts[2].");
-        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, accounts[2]);
+        await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[2]), 7, 1, {from: accounts[2]});
         await cereneumInstance.testAdjustContractLaunchTime(7);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[1]);
         await cereneumInstance.testAdjustStakeTime(0, 7, accounts[2]);
-        await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
-        await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+        await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
         assert(parseInt(await cereneumInstance.balanceOf(accounts[1]), 10) > parseInt(await cereneumInstance.balanceOf(accounts[2]), 10), "account2 greater than account1");
 
@@ -4323,7 +4378,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -4357,7 +4412,7 @@ contract('Cereneum', (accounts) => {
       );
 
       //Now we end the stake ourselves
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -4397,7 +4452,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -4429,7 +4484,7 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.testAdjustStakeFriendlyTime(0, nAdjustedDays, accounts[1]);
 
       //Now we end the stake ourselves
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -4466,7 +4521,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -4512,7 +4567,7 @@ contract('Cereneum', (accounts) => {
       nPayout = Math.floor(nPayout * .9);
 
       //Now we end the stake ourselves
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -4553,7 +4608,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -4606,7 +4661,7 @@ contract('Cereneum', (accounts) => {
       nGenesisAddressBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
       //Now we end the stake ourselves
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       var nBalanceAfterEndStake = await cereneumInstance.balanceOf(accounts[1]);
 
@@ -4641,7 +4696,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -4674,7 +4729,7 @@ contract('Cereneum', (accounts) => {
 
       await cereneumInstance.testAdjustContractLaunchTime(1);
       await cereneumInstance.testAdjustStakeTime(0, 1, accounts[1]);
-      await cereneumInstance.CompoundInterest(0, accounts[1]);
+      await cereneumInstance.CompoundInterest(0, {from: accounts[1]});
 
       var nTotalSharesAfterCompound = parseInt(await cereneumInstance.m_nTotalStakeShares(),10);
       assert(nTotalSharesAfterCompound == (nTotalShares + nPayoutRound), "total shares incorrect");
@@ -4712,21 +4767,21 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(10000, 7, 1, accounts[2]);
+      await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[2]});
 
       var nGenesisAddressStartingBalance = await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d");
 
-      await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
-      await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
-      await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
-      await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
       var nBalanceAfterEarlyUnstakes = await cereneumInstance.balanceOf(accounts[1]);
       var nUnstakePenalties = 2000; //5% of 10000 should be 500 penalty each time
@@ -4820,7 +4875,7 @@ contract('Cereneum', (accounts) => {
       var nAdjustedDays = 7;
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(0, nAdjustedDays, accounts[2]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[2]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[2]});
 
       var nBalanceAfterStake = await cereneumInstance.balanceOf(accounts[2]);
 
@@ -4835,7 +4890,7 @@ contract('Cereneum', (accounts) => {
 
       var nNewBalanceAfterClaim = parseInt(await cereneumInstance.balanceOf(accounts[3]), 10);
 
-      await cereneumInstance.StartStake(10000, 7, 1, accounts[3]);
+      await cereneumInstance.StartStake(10000, 7, 1, {from: accounts[3]});
 
       nTotalSupply = parseInt(await cereneumInstance.totalSupply(), 10);
 
@@ -4919,7 +4974,7 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(0, nAdjustedDays, accounts[3]);
 
-      await cereneumInstance.testEndStakeSafely(0, accounts[3]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[3]});
 
       var nAccount3AfterEndStake = await cereneumInstance.balanceOf(accounts[3]);
 
@@ -4947,7 +5002,7 @@ contract('Cereneum', (accounts) => {
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365, 1, accounts[1]);
+      await cereneumInstance.StartStake(await cereneumInstance.balanceOf(accounts[1]), 365, 1, {from: accounts[1]});
 
       for(var p=0; p<24; ++p)
       {
@@ -4958,7 +5013,7 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.testAdjustContractLaunchTime(10);
       await cereneumInstance.testAdjustStakeTime(0, 10, accounts[1]);
 
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       //We should have no payout left
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) == nClaimAmount*1.2);
@@ -4985,7 +5040,7 @@ contract('Cereneum', (accounts) => {
       //12 stakes should be all of our tokens
       for(var j=0; j < 12; ++j)
       {
-        await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
+        await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
       }
 
       var nNumOfStakes = await cereneumInstance.GetNumberOfStakes(accounts[1]);
@@ -4999,83 +5054,83 @@ contract('Cereneum', (accounts) => {
 
       for(var j=0; j < 12; ++j)
       {
-        await cereneumInstance.testEndStake(0, accounts[1]);
+        await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
       }
 
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) == (parseInt(nClaimAmount*1.2,10) - parseInt(12*500,10)));
 
       for(var j=0; j < 10; ++j)
       {
-        await cereneumInstance.StartStake(10000, 365, 1, accounts[1]);
+        await cereneumInstance.StartStake(10000, 365, 1, {from: accounts[1]});
       }
 
-      await cereneumInstance.testEndStake(9, accounts[1]);
-      await cereneumInstance.testEndStake(8, accounts[1]);
-      await cereneumInstance.testEndStake(4, accounts[1]);
-      await cereneumInstance.testEndStake(6, accounts[1]);
-      await cereneumInstance.testEndStake(1, accounts[1]);
-      await cereneumInstance.testEndStake(4, accounts[1]);
-      await cereneumInstance.testEndStake(3, accounts[1]);
-      await cereneumInstance.testEndStake(2, accounts[1]);
-      await cereneumInstance.testEndStake(1, accounts[1]);
-      await cereneumInstance.testEndStake(0, accounts[1]);
+      await cereneumInstance.EndStakeEarly(9, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(8, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(4, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(6, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(4, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(3, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(2, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(1, {from: accounts[1]});
+      await cereneumInstance.EndStakeEarly(0, {from: accounts[1]});
 
       assert(parseInt(await cereneumInstance.balanceOf(accounts[1]),10) == (parseInt(nClaimAmount*1.2,10) - parseInt(12*500,10) - parseInt(10*500,10)));
 
       for(var j=1; j <= 10; ++j)
       {
-        await cereneumInstance.StartStake(10000, 7*j, 1, accounts[1]);
+        await cereneumInstance.StartStake(10000, 7*j, 1, {from: accounts[1]});
       }
 
       nAdjustedDays = 7;
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(0, nAdjustedDays, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       //9 got moved to 0
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(1, 14, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(1, accounts[1]);
+      await cereneumInstance.EndStakeSafely(1, {from: accounts[1]});
 
       //8 got moved to 1
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(2, 21, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(2, accounts[1]);
+      await cereneumInstance.EndStakeSafely(2, {from: accounts[1]});
 
       //7 got moved to 2
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(3, 28, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(3, accounts[1]);
+      await cereneumInstance.EndStakeSafely(3, {from: accounts[1]});
 
       //6 got moved to 3
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(4, 35, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(4, accounts[1]);
+      await cereneumInstance.EndStakeSafely(4, {from: accounts[1]});
 
       //5 got moved to 4
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(4, 42, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(4, accounts[1]);
+      await cereneumInstance.EndStakeSafely(4, {from: accounts[1]});
 
       //6 is at 3 now
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(3, 49, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(3, accounts[1]);
+      await cereneumInstance.EndStakeSafely(3, {from: accounts[1]});
 
       //7 is at 2 now
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(2, 56, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(2, accounts[1]);
+      await cereneumInstance.EndStakeSafely(2, {from: accounts[1]});
 
       //8 is at 1 now
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(1, 63, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(1, accounts[1]);
+      await cereneumInstance.EndStakeSafely(1, {from: accounts[1]});
 
       //9 is at 0 now
       await cereneumInstance.testAdjustContractLaunchTime(nAdjustedDays);
       await cereneumInstance.testAdjustStakeTime(0, 70, accounts[1]);
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
 
       assert(await cereneumInstance.GetNumberOfStakes(accounts[1]) == 0);
     });
@@ -5145,7 +5200,7 @@ contract('Cereneum', (accounts) => {
       var nBalanceAfterClaim = await cereneumInstance.balanceOf(accounts[1]);
       assert(nBalanceAfterClaim == Math.floor(Math.floor(nClaimAmount*1.2)));
 
-      var stakeReceipt = await cereneumInstance.StartStake(10, 365*5, 1, accounts[1]);
+      var stakeReceipt = await cereneumInstance.StartStake(10, 365*5, 1, {from: accounts[1]});
       var sStakeReceipt = JSON.stringify(stakeReceipt, null, 4);
       jsonReceipt = JSON.parse(sStakeReceipt);
       logs = jsonReceipt.receipt.logs;
@@ -5173,7 +5228,7 @@ contract('Cereneum', (accounts) => {
       await cereneumInstance.testAdjustContractLaunchTime(5);
       await cereneumInstance.testAdjustStakeTime(0, 5, accounts[1]);
 
-      await cereneumInstance.testEndStakeSafely(0, accounts[1]);
+      await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
       assert(await cereneumInstance.balanceOf(cereneumInstance.address) >= 0);
       assert(await cereneumInstance.balanceOf(cereneumInstance.address) < 2000, "Ending contract balance incorrect");  //Contract balance should be very low
     });
@@ -5182,22 +5237,20 @@ contract('Cereneum', (accounts) => {
 
 
     //The following Unit Tests will all fail on purpose
-    /*it('FAILClaimAfter50Weeks', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
+    /*it('FAILClaimAfter52Weeks', async () => {
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
-      //Advance contract time 50 weeks
-      await cereneumInstance.testAdjustContractLaunchTime(120);
-      await cereneumInstance.testAdjustContractLaunchTime(120);
-      await cereneumInstance.testAdjustContractLaunchTime(110);
+      //Advance contract time 52 weeks
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+      await cereneumInstance.testAdjustContractLaunchTime(100);
+      await cereneumInstance.testAdjustContractLaunchTime(100);
+      await cereneumInstance.testAdjustContractLaunchTime(100);
+      await cereneumInstance.testAdjustContractLaunchTime(50);
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5217,17 +5270,39 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
     });
-    it('FAILClaimingTwice', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
+    it('FAILClaimIncorrectAmount', async () => {
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
+                    "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
+                    "0x5ffbc621d6b4950b0ba91a8aa9e5121493b5108f69c26c7c572ea6fb1c094070"];
+
+      var receiptObject = await cereneumInstance.Claim(
+            73350,
+            proofs,
+            "0xE658D355303e96425c38FB4778a3E8a56F582Eb0",
+            "0xd41aa46c1156f95df467dd0fabcb8e3e35ebb4e18b3b9563cf069fac31119110",
+            "0x673163cbd18de12157515bf6b3de69deefb5730e5aea7d34700a641cb70b191b",
+            1,
+            28,
+            "0x2255bea3f315795154b6fbcd48002a98422ddced7c58be4e8a84f7c0a9ff579b",
+            "0x36d14316ae8e98620f211f6c986500a64bb88ab2f85f3c2a5c26c0becb98837e",
+            1,
+            "0x0000000000000000000000000000000000000000"
+      );
+    });
+    it('FAILClaimingTwice', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5262,16 +5337,12 @@ contract('Cereneum', (accounts) => {
       );
     });
     it('FAILStakeFor6Days', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5291,19 +5362,17 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
 
-      await cereneumInstance.StartStake(10, 6, 1, "0xE658D355303e96425c38FB4778a3E8a56F582Eb0");
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartStake(10, 6, 1, {from: "0xE658D355303e96425c38FB4778a3E8a56F582Eb0"});
     });
     it('FAILStakeEmptyAccount', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5323,19 +5392,47 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
 
-      await cereneumInstance.StartStake(10, 7, 1, accounts[1]);
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartStake(10, 7, 1, {from: accounts[1]});
+    });
+    it('FAILStakeDuringBufferPeriod', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
+                    "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
+                    "0x5ffbc621d6b4950b0ba91a8aa9e5121493b5108f69c26c7c572ea6fb1c094070"];
+
+      var receiptObject = await cereneumInstance.Claim(
+            73349,
+            proofs,
+            "0xE658D355303e96425c38FB4778a3E8a56F582Eb0",
+            "0xd41aa46c1156f95df467dd0fabcb8e3e35ebb4e18b3b9563cf069fac31119110",
+            "0x673163cbd18de12157515bf6b3de69deefb5730e5aea7d34700a641cb70b191b",
+            1,
+            28,
+            "0x2255bea3f315795154b6fbcd48002a98422ddced7c58be4e8a84f7c0a9ff579b",
+            "0x36d14316ae8e98620f211f6c986500a64bb88ab2f85f3c2a5c26c0becb98837e",
+            1,
+            "0x0000000000000000000000000000000000000000"
+      );
+
+      await cereneumInstance.testAdjustContractLaunchTime(13);
+
+      await cereneumInstance.StartStake(10, 7, 1, {from: "0xE658D355303e96425c38FB4778a3E8a56F582Eb0"});
     });
     it('FAILStakeOver5Years', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5354,20 +5451,18 @@ contract('Cereneum', (accounts) => {
             1,
             "0x0000000000000000000000000000000000000000"
       );
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
 
       await cereneumInstance.StartStake(10, 1+(365*5), 1, "0xE658D355303e96425c38FB4778a3E8a56F582Eb0");
     });
     it('FAILEndStakeOutOfBounds', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5386,20 +5481,18 @@ contract('Cereneum', (accounts) => {
             1,
             "0x0000000000000000000000000000000000000000"
       );
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
 
       await cereneumInstance.EndStakeEarly(0);
     });
     it('FAILEndStakeOutOfBounds2', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5418,20 +5511,18 @@ contract('Cereneum', (accounts) => {
             1,
             "0x0000000000000000000000000000000000000000"
       );
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
 
       await cereneumInstance.EndStakeSafely(0);
     });
     it('FAILEndStakeOutOfBounds3', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5450,20 +5541,18 @@ contract('Cereneum', (accounts) => {
             1,
             "0x0000000000000000000000000000000000000000"
       );
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
 
       await cereneumInstance.EndStakeForAFriend(0, accounts[1]);
     });
     it('FAILEndStakeOutOfBounds4', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5483,21 +5572,19 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
 
-      await cereneumInstance.StartStake(10, 7, 1, accounts[0]);
+      await cereneumInstance.testAdjustContractLaunchTime(14);
 
-      await cereneumInstance.EndStakeEarly(1);
+      await cereneumInstance.StartStake(10, 7, 1, {from: accounts[0]});
+
+      await cereneumInstance.EndStakeEarly(1, {from: accounts[0]});
     });
     it('FAILEndStakeOutOfBounds5', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5517,23 +5604,21 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
 
-      await cereneumInstance.StartStake(10, 7, 1, accounts[0]);
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartStake(10, 7, 1, {from: accounts[0]});
       await cereneumInstance.testAdjustContractLaunchTime(7);
       await cereneumInstance.testAdjustStakeTime(0, 7, accounts[0]);
 
-      await cereneumInstance.EndStakeSafely(1);
+      await cereneumInstance.EndStakeSafely(1, {from: accounts[0]});
     });
     it('FAILEndStakeOutOfBounds6', async () => {
-      var nSatoshiAmountAtLaunch = 10000000;
       const cereneumInstance = await Cereneum.new(
         "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
         "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
         "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
-        nSatoshiAmountAtLaunch,
-        1000,
-        accounts[0]);
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
 
       var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
                     "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
@@ -5553,10 +5638,155 @@ contract('Cereneum', (accounts) => {
             "0x0000000000000000000000000000000000000000"
       );
 
-      await cereneumInstance.StartStake(10, 7, 1, accounts[0]);
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartStake(10, 7, 1, {from: "0xE658D355303e96425c38FB4778a3E8a56F582Eb0"});
       await cereneumInstance.testAdjustContractLaunchTime(7);
       await cereneumInstance.testAdjustStakeTime(0, 7, accounts[0]);
 
       await cereneumInstance.EndStakeForAFriend(1, accounts[0]);
+    });
+    it('FAILEthPoolDuringBufferPeriod', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.testAdjustContractLaunchTime(13);
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+    });
+    it('FAILEthPoolBelowMinimum', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:1000000000000000});  //Send below the minimim 0.01 ETH
+    });
+    it('FAILEthPoolWithdraw', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.WithdrawFromEthPool(0);
+    });
+    it('FAILEthPoolWithdraw1', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+      await cereneumInstance.WithdrawFromEthPool(0);
+    });
+    it('FAILEthPoolWithdraw2', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.testAdjustContractLaunchTime(14);
+
+      await cereneumInstance.StartEthStake({from:accounts[0], value:10000000000000000});  //Send the minimim 0.01 ETH
+      await cereneumInstance.testAdjustContractLaunchTime(1);
+      await cereneumInstance.WithdrawFromEthPool(1);
+    });
+    it('FAILExchangeEthereumAirdropsCalledTwice', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      await cereneumInstance.ExchangeEthereumAirdrops();
+      await cereneumInstance.ExchangeEthereumAirdrops();
+    });
+    it('FAILClaimIncorrectBlockchain', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
+                    "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
+                    "0x5ffbc621d6b4950b0ba91a8aa9e5121493b5108f69c26c7c572ea6fb1c094070"];
+
+      var receiptObject = await cereneumInstance.Claim(
+            73349,
+            proofs,
+            "0xE658D355303e96425c38FB4778a3E8a56F582Eb0",
+            "0xd41aa46c1156f95df467dd0fabcb8e3e35ebb4e18b3b9563cf069fac31119110",
+            "0x673163cbd18de12157515bf6b3de69deefb5730e5aea7d34700a641cb70b191b",
+            1,
+            28,
+            "0x2255bea3f315795154b6fbcd48002a98422ddced7c58be4e8a84f7c0a9ff579b",
+            "0x36d14316ae8e98620f211f6c986500a64bb88ab2f85f3c2a5c26c0becb98837e",
+            5,
+            "0x0000000000000000000000000000000000000000"
+      );
+    });
+    it('FAILClaimIncorrectBlockchain2', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x3d0e9344f87244f6978f3b052c26d062610859e4563a57d07635e70b2177f149",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4",
+        "0x64b079b295aa002cf67475c9a370e1d0037ce0ce09e2bfe7b675fe9bf6d1c8c4");
+
+      var proofs = ["0x50cb917542721042dfc91ee0c10ed47ff9f84218fccafc9dbaecb15298e9069c",
+                    "0x180f0298caadd5e5489f6fe04f256ef0cfd9e612f904627e9a5802a00aa42e9d",
+                    "0x5ffbc621d6b4950b0ba91a8aa9e5121493b5108f69c26c7c572ea6fb1c094070"];
+
+      var receiptObject = await cereneumInstance.Claim(
+            73349,
+            proofs,
+            "0xE658D355303e96425c38FB4778a3E8a56F582Eb0",
+            "0xd41aa46c1156f95df467dd0fabcb8e3e35ebb4e18b3b9563cf069fac31119110",
+            "0x673163cbd18de12157515bf6b3de69deefb5730e5aea7d34700a641cb70b191b",
+            1,
+            28,
+            "0x2255bea3f315795154b6fbcd48002a98422ddced7c58be4e8a84f7c0a9ff579b",
+            "0x36d14316ae8e98620f211f6c986500a64bb88ab2f85f3c2a5c26c0becb98837e",
+            -1,
+            "0x0000000000000000000000000000000000000000"
+      );
+    });
+    it('FAILInvalidAccountForStake', async () => {
+      const cereneumInstance = await Cereneum.new(
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+        "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd");
+
+        await cereneumInstance.testFakeClaim(
+              100000,
+              accounts[3],
+              0
+            );
+
+        //Adjust 14 days for buffer window after launch
+        await cereneumInstance.testAdjustContractLaunchTime(14);
+
+        await cereneumInstance.StartStake(10000, 365*5, 1, {from: "0xE658D355303e96425c38FB4778a3E8a56F582Eb0"});
     });*/
 });
