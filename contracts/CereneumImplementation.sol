@@ -226,289 +226,289 @@ contract CereneumImplementation is CereneumData
                 _mint(m_genesis, nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)); // Prosperous
             }
 	    else
-			{
-				//If we are not in the claimable phase anymore apply the voted on interest multiplier
+	    {
+	        //If we are not in the claimable phase anymore apply the voted on interest multiplier
 
-				//First we need to check if there is a new "most voted on" multiplier
-				uint8 nVoteMultiplier = 1;
-				uint256 nVoteCount = m_votingMultiplierMap[1];
+		//First we need to check if there is a new "most voted on" multiplier
+		uint8 nVoteMultiplier = 1;
+		uint256 nVoteCount = m_votingMultiplierMap[1];
 
-				for(uint8 i=2; i <= 10; i++)
-				{
-					if(m_votingMultiplierMap[i] > nVoteCount)
-					{
-						nVoteCount = m_votingMultiplierMap[i];
-						nVoteMultiplier = i;
-					}
-				}
-
-				nPayoutRound = nPayoutRound.mul(nVoteMultiplier);
-
-				//Store last interest multiplier for public viewing
-				m_nInterestMultiplier = nVoteMultiplier;
-			}
-
-			//Add nPayoutRound to contract's balance
-			_mint(address(this), nPayoutRound.sub(nUnclaimedCoins));
-
-      //Add early and late unstake pool to payout round
-			if(m_nEarlyAndLateUnstakePool != 0)
-			{
-      	nPayoutRound = nPayoutRound.add(m_nEarlyAndLateUnstakePool);
-				//Reset back to 0 for next day
-      	m_nEarlyAndLateUnstakePool = 0;
-			}
-
-    	//Store daily data
-      m_dailyDataMap[m_nLastUpdatedDay] = DailyDataStuct(
-        nPayoutRound,
-        m_nTotalStakeShares,
-				m_nTotalEthStaked
-      );
-
-			m_nTotalEthStaked = 0;
-    }
-  }
-
-  /// @dev Gets the circulating supply (total supply minus staked coins).
-  /// @return Circulating Supply
-  function GetCirculatingSupply() external view returns (uint256)
-	{
-    return totalSupply().sub(balanceOf(address(this)));
-  }
-
-  /// @dev Verify a Merkle proof using the UTXO Merkle tree
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_hMerkleLeaf Merkle leaf hash that must be present in the UTXO Merkle tree
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Boolean on validity of proof
-  function VerifyProof(
-    bytes32[] memory a_hMerkleTreeBranches,
-    bytes32 a_hMerkleLeaf,
-    BlockchainType a_nWhichChain
-  ) public view returns (bool)
-	{
-    require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Invalid blockchain option");
-
-    return MerkleProof.verify(a_hMerkleTreeBranches, m_hMerkleTreeRootsArray[uint8(a_nWhichChain)], a_hMerkleLeaf);
-  }
-
-  /// @dev Validate the ECDSA parameters of signed message
-  /// ECDSA public key associated with the specified Ethereum address
-  /// @param a_addressClaiming Address within signed message
-  /// @param a_publicKeyX X parameter of uncompressed ECDSA public key
-  /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key
-  /// @param a_v v parameter of ECDSA signature
-  /// @param a_r r parameter of ECDSA signature
-  /// @param a_s s parameter of ECDSA signature
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Boolean on if the signature is valid
-  function ECDSAVerify(
-    address a_addressClaiming,
-    bytes32 a_publicKeyX,
-    bytes32 a_publicKeyY,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    BlockchainType a_nWhichChain
-  ) public pure returns (bool)
-	{
-    bytes memory addressAsHex = GenerateSignatureMessage(a_addressClaiming, a_nWhichChain);
-
-    bytes32 hHash;
-    if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin do double sha256 hash
-    {
-      hHash = sha256(abi.encodePacked(sha256(abi.encodePacked(addressAsHex))));
-    }
-    else //Otherwise ETH
-    {
-      hHash = keccak256(abi.encodePacked(addressAsHex));
-    }
-
-    return ValidateSignature(
-      hHash,
-      a_v,
-      a_r,
-      a_s,
-      PublicKeyToEthereumAddress(a_publicKeyX, a_publicKeyY)
-    );
-  }
-
-  /// @dev Convert an uncompressed ECDSA public key into an Ethereum address
-  /// @param a_publicKeyX X parameter of uncompressed ECDSA public key
-  /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key
-  /// @return Ethereum address generated from the ECDSA public key
-  function PublicKeyToEthereumAddress(
-    bytes32 a_publicKeyX,
-    bytes32 a_publicKeyY
-  ) public pure returns (address)
-	{
-		bytes32 hash = keccak256(abi.encodePacked(a_publicKeyX, a_publicKeyY));
-    return address(uint160(uint256((hash))));
-  }
-
-  /// @dev Calculate the Bitcoin-style address associated with an ECDSA public key
-  /// @param a_publicKeyX First half of ECDSA public key
-  /// @param a_publicKeyY Second half of ECDSA public key
-  /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
-  /// @return Raw Bitcoin address
-  function PublicKeyToBitcoinAddress(
-    bytes32 a_publicKeyX,
-    bytes32 a_publicKeyY,
-    AddressType a_nAddressType
-  ) public pure returns (bytes20)
-	{
-    bytes20 publicKey;
-    uint8 initialByte;
-    if(a_nAddressType == AddressType.LegacyCompressed || a_nAddressType == AddressType.SegwitCompressed)
+		for(uint8 i=2; i <= 10; i++)
 		{
-      //Hash the compressed format
-      initialByte = (uint256(a_publicKeyY) & 1) == 0 ? 0x02 : 0x03;
-      publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX))));
-    }
-		else
-		{
-      //Hash the uncompressed format
-      initialByte = 0x04;
-      publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX, a_publicKeyY))));
+		    if(m_votingMultiplierMap[i] > nVoteCount)
+		    {
+		        nVoteCount = m_votingMultiplierMap[i];
+			nVoteMultiplier = i;
+		    }
+		}
+
+		nPayoutRound = nPayoutRound.mul(nVoteMultiplier);
+
+		//Store last interest multiplier for public viewing
+	        m_nInterestMultiplier = nVoteMultiplier;
+	    }
+
+	    //Add nPayoutRound to contract's balance
+	    _mint(address(this), nPayoutRound.sub(nUnclaimedCoins));
+
+            //Add early and late unstake pool to payout round
+	    if(m_nEarlyAndLateUnstakePool != 0)
+	    {
+      	        nPayoutRound = nPayoutRound.add(m_nEarlyAndLateUnstakePool);
+		//Reset back to 0 for next day
+      	        m_nEarlyAndLateUnstakePool = 0;
+	    }
+
+    	    //Store daily data
+            m_dailyDataMap[m_nLastUpdatedDay] = DailyDataStuct(
+                nPayoutRound,
+                m_nTotalStakeShares,
+		m_nTotalEthStaked
+            );
+
+	    m_nTotalEthStaked = 0;
+        }
     }
 
-    if(a_nAddressType == AddressType.LegacyUncompressed || a_nAddressType == AddressType.LegacyCompressed)
+    /// @dev Gets the circulating supply (total supply minus staked coins).
+    /// @return Circulating Supply
+    function GetCirculatingSupply() external view returns (uint256)
     {
-      return publicKey;
+        return totalSupply().sub(balanceOf(address(this)));
     }
-    else if(a_nAddressType == AddressType.SegwitUncompressed || a_nAddressType == AddressType.SegwitCompressed)
+
+    /// @dev Verify a Merkle proof using the UTXO Merkle tree
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_hMerkleLeaf Merkle leaf hash that must be present in the UTXO Merkle tree
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Boolean on validity of proof
+    function VerifyProof(
+        bytes32[] memory a_hMerkleTreeBranches,
+        bytes32 a_hMerkleLeaf,
+        BlockchainType a_nWhichChain
+    ) public view returns (bool)
     {
-      return ripemd160(abi.encodePacked(sha256(abi.encodePacked(hex"0014", publicKey))));
+        require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Invalid blockchain option");
+
+        return MerkleProof.verify(a_hMerkleTreeBranches, m_hMerkleTreeRootsArray[uint8(a_nWhichChain)], a_hMerkleLeaf);
     }
-  }
 
-  /// @dev Appends an Ethereum address onto the expected string for a Bitcoin signed message
-  /// @param a_address Ethereum address
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Correctly formatted message for bitcoin signing
-	function GenerateSignatureMessage(
-    address a_address,
-    BlockchainType a_nWhichChain
-  ) public pure returns(bytes memory)
-	{
-		bytes16 hexDigits = "0123456789abcdef";
-		bytes memory prefix;
-    uint8 nPrefixLength = 0;
-
-    //One of the bitcoin chains
-    if(a_nWhichChain >= BlockchainType.Bitcoin && a_nWhichChain <= BlockchainType.BitcoinSV)
+    /// @dev Validate the ECDSA parameters of signed message
+    /// ECDSA public key associated with the specified Ethereum address
+    /// @param a_addressClaiming Address within signed message
+    /// @param a_publicKeyX X parameter of uncompressed ECDSA public key
+    /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Boolean on if the signature is valid
+    function ECDSAVerify(
+        address a_addressClaiming,
+        bytes32 a_publicKeyX,
+        bytes32 a_publicKeyY,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        BlockchainType a_nWhichChain
+    ) public pure returns (bool)
     {
-      nPrefixLength = 46;
-      prefix = new bytes(nPrefixLength);
-      prefix = "\x18Bitcoin Signed Message:\n\x3CClaim_Cereneum_to_0x";
+        bytes memory addressAsHex = GenerateSignatureMessage(a_addressClaiming, a_nWhichChain);
+
+        bytes32 hHash;
+        if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin do double sha256 hash
+        {
+            hHash = sha256(abi.encodePacked(sha256(abi.encodePacked(addressAsHex))));
+        }
+        else //Otherwise ETH
+        {
+          hHash = keccak256(abi.encodePacked(addressAsHex));
+        }
+
+        return ValidateSignature(
+            hHash,
+            a_v,
+            a_r,
+            a_s,
+            PublicKeyToEthereumAddress(a_publicKeyX, a_publicKeyY)
+        );
     }
-    else if(a_nWhichChain == BlockchainType.Ethereum) //Ethereum chain
+
+    /// @dev Convert an uncompressed ECDSA public key into an Ethereum address
+    /// @param a_publicKeyX X parameter of uncompressed ECDSA public key
+    /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key
+    /// @return Ethereum address generated from the ECDSA public key
+    function PublicKeyToEthereumAddress(
+        bytes32 a_publicKeyX,
+        bytes32 a_publicKeyY
+    ) public pure returns (address)
     {
-      nPrefixLength = 48;
-      prefix = new bytes(nPrefixLength);
-      prefix = "\x19Ethereum Signed Message:\n60Claim_Cereneum_to_0x";
+        bytes32 hash = keccak256(abi.encodePacked(a_publicKeyX, a_publicKeyY));
+        return address(uint160(uint256((hash))));
     }
-    else  //Otherwise LTC
+
+    /// @dev Calculate the Bitcoin-style address associated with an ECDSA public key
+    /// @param a_publicKeyX First half of ECDSA public key
+    /// @param a_publicKeyY Second half of ECDSA public key
+    /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
+    /// @return Raw Bitcoin address
+    function PublicKeyToBitcoinAddress(
+        bytes32 a_publicKeyX,
+        bytes32 a_publicKeyY,
+        AddressType a_nAddressType
+    ) public pure returns (bytes20)
     {
-      nPrefixLength = 47;
-      prefix = new bytes(nPrefixLength);
-      prefix = "\x19Litecoin Signed Message:\n\x3CClaim_Cereneum_to_0x";
+        bytes20 publicKey;
+        uint8 initialByte;
+        if(a_nAddressType == AddressType.LegacyCompressed || a_nAddressType == AddressType.SegwitCompressed)
+	{
+            //Hash the compressed format
+            initialByte = (uint256(a_publicKeyY) & 1) == 0 ? 0x02 : 0x03;
+            publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX))));
+        }
+	else
+	{
+            //Hash the uncompressed format
+            initialByte = 0x04;
+            publicKey = ripemd160(abi.encodePacked(sha256(abi.encodePacked(initialByte, a_publicKeyX, a_publicKeyY))));
+        }
+
+        if(a_nAddressType == AddressType.LegacyUncompressed || a_nAddressType == AddressType.LegacyCompressed)
+        {
+            return publicKey;
+        }
+        else if(a_nAddressType == AddressType.SegwitUncompressed || a_nAddressType == AddressType.SegwitCompressed)
+        {
+            return ripemd160(abi.encodePacked(sha256(abi.encodePacked(hex"0014", publicKey))));
+        }
     }
 
-		bytes20 addressBytes = bytes20(a_address);
-		bytes memory message = new bytes(nPrefixLength + 40);
-		uint256 nOffset = 0;
+    /// @dev Appends an Ethereum address onto the expected string for a Bitcoin signed message
+    /// @param a_address Ethereum address
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Correctly formatted message for bitcoin signing
+    function GenerateSignatureMessage(
+        address a_address,
+        BlockchainType a_nWhichChain
+    ) public pure returns(bytes memory)
+    {
+        bytes16 hexDigits = "0123456789abcdef";
+	bytes memory prefix;
+        uint8 nPrefixLength = 0;
 
-		for(uint i = 0; i < nPrefixLength; i++)
-		{
-    	message[nOffset++] = prefix[i];
+        //One of the bitcoin chains
+        if(a_nWhichChain >= BlockchainType.Bitcoin && a_nWhichChain <= BlockchainType.BitcoinSV)
+        {
+            nPrefixLength = 46;
+            prefix = new bytes(nPrefixLength);
+            prefix = "\x18Bitcoin Signed Message:\n\x3CClaim_Cereneum_to_0x";
+        }
+        else if(a_nWhichChain == BlockchainType.Ethereum) //Ethereum chain
+        {
+            nPrefixLength = 48;
+            prefix = new bytes(nPrefixLength);
+            prefix = "\x19Ethereum Signed Message:\n60Claim_Cereneum_to_0x";
+        }
+        else  //Otherwise LTC
+        {
+            nPrefixLength = 47;
+            prefix = new bytes(nPrefixLength);
+            prefix = "\x19Litecoin Signed Message:\n\x3CClaim_Cereneum_to_0x";
+        }
+
+	bytes20 addressBytes = bytes20(a_address);
+	bytes memory message = new bytes(nPrefixLength + 40);
+	uint256 nOffset = 0;
+
+	for(uint i = 0; i < nPrefixLength; i++)
+	{
+    	    message[nOffset++] = prefix[i];
+        }
+
+	for(uint i = 0; i < 20; i++)
+	{
+            message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] >> 4))];
+            message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] & 0x0f))];
+        }
+
+	return message;
     }
 
-		for(uint i = 0; i < 20; i++)
-		{
-      message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] >> 4))];
-      message[nOffset++] = hexDigits[uint256(uint8(addressBytes[i] & 0x0f))];
+    /// @dev Validate ECSDA signature was signed by the specified address
+    /// @param a_hash Hash of signed data
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_address Ethereum address matching the signature
+    /// @return Boolean on if the signature is valid
+    function ValidateSignature(
+        bytes32 a_hash,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        address a_address
+    ) public pure returns (bool)
+    {
+        return ecrecover(
+            a_hash,
+            a_v,
+            a_r,
+            a_s
+        ) == a_address;
     }
 
-		return message;
-	}
+    /// @dev Verify that a UTXO with the Merkle leaf hash can be claimed
+    /// @param a_hMerkleLeafHash Merkle tree hash of the UTXO to be checked
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Boolean on if the UTXO from the given hash can be redeemed
+    function CanClaimUTXOHash(
+        bytes32 a_hMerkleLeafHash,
+        bytes32[] memory a_hMerkleTreeBranches,
+        BlockchainType a_nWhichChain
+    ) public view returns (bool)
+    {
+        //Check that the UTXO has not yet been redeemed and that it exists in the Merkle tree
+        return(
+            (m_claimedUTXOsMap[uint8(a_nWhichChain)][a_hMerkleLeafHash] == false) && VerifyProof(a_hMerkleTreeBranches, a_hMerkleLeafHash, a_nWhichChain)
+        );
+    }
 
-  /// @dev Validate ECSDA signature was signed by the specified address
-  /// @param a_hash Hash of signed data
-  /// @param a_v v parameter of ECDSA signature
-  /// @param a_r r parameter of ECDSA signature
-  /// @param a_s s parameter of ECDSA signature
-  /// @param a_address Ethereum address matching the signature
-  /// @return Boolean on if the signature is valid
-  function ValidateSignature(
-    bytes32 a_hash,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    address a_address
-  ) public pure returns (bool)
-	{
-    return ecrecover(
-      a_hash,
-      a_v,
-      a_r,
-      a_s
-    ) == a_address;
-  }
+    /// @dev Check if address can make a claim
+    /// @param a_addressRedeeming Raw Bitcoin address (no base58-check encoding)
+    /// @param a_nAmount Amount of UTXO to redeem
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Boolean on if the UTXO can be redeemed
+    function CanClaim(
+        bytes20 a_addressRedeeming,
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        BlockchainType a_nWhichChain
+    ) public view returns (bool)
+    {
+        //Calculate the hash of the Merkle leaf associated with this UTXO
+        bytes32 hMerkleLeafHash = keccak256(
+            abi.encodePacked(
+                a_addressRedeeming,
+                a_nAmount
+            )
+        );
 
-  /// @dev Verify that a UTXO with the Merkle leaf hash can be claimed
-  /// @param a_hMerkleLeafHash Merkle tree hash of the UTXO to be checked
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Boolean on if the UTXO from the given hash can be redeemed
-  function CanClaimUTXOHash(
-    bytes32 a_hMerkleLeafHash,
-    bytes32[] memory a_hMerkleTreeBranches,
-    BlockchainType a_nWhichChain
-  ) public view returns (bool)
-	{
-    //Check that the UTXO has not yet been redeemed and that it exists in the Merkle tree
-    return(
-			(m_claimedUTXOsMap[uint8(a_nWhichChain)][a_hMerkleLeafHash] == false) && VerifyProof(a_hMerkleTreeBranches, a_hMerkleLeafHash, a_nWhichChain)
-    );
-  }
+        //Check if it can be redeemed
+        return CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain);
+    }
 
-  /// @dev Check if address can make a claim
-  /// @param a_addressRedeeming Raw Bitcoin address (no base58-check encoding)
-  /// @param a_nAmount Amount of UTXO to redeem
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Boolean on if the UTXO can be redeemed
-  function CanClaim(
-    bytes20 a_addressRedeeming,
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    BlockchainType a_nWhichChain
-  ) public view returns (bool)
-	{
-    //Calculate the hash of the Merkle leaf associated with this UTXO
-    bytes32 hMerkleLeafHash = keccak256(
-      abi.encodePacked(
-        a_addressRedeeming,
-        a_nAmount
-      )
-    );
-
-    //Check if it can be redeemed
-    return CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain);
-  }
-
-	/// @dev Calculates the monthly Robin Hood reward
-  /// @param a_nAmount The amount to calculate from
-  /// @param a_nDaysSinceLaunch The number of days since contract launch
-  /// @return The amount after applying monthly Robin Hood calculation
-	function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
-	{
-		uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-		uint256 nScalar = 400000000000000;	// 0.25%
-		//Month 1 - 0.25% late penalty
-		if(a_nDaysSinceLaunch < 43)
+    /// @dev Calculates the monthly Robin Hood reward
+    /// @param a_nAmount The amount to calculate from
+    /// @param a_nDaysSinceLaunch The number of days since contract launch
+    /// @return The amount after applying monthly Robin Hood calculation
+  function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+  {
+      uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+      uint256 nScalar = 400000000000000;	// 0.25%
+      //Month 1 - 0.25% late penalty
+  if(a_nDaysSinceLaunch < 43)
 		{
 			return nScaledAmount.div(nScalar.mul(29));
 		}
