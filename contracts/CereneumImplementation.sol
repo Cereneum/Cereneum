@@ -4,228 +4,228 @@ import "./CereneumData.sol";
 
 contract CereneumImplementation is CereneumData
 {
-	using SafeMath for uint256;
+    using SafeMath for uint256;
 
-	//Events
-  event ClaimEvent(
-    uint256 nOriginalClaimAmount,
-    uint256 nAmountGranted,
-    uint256 nBonuses,
-		uint256 nPenalties,
-    bool bWasReferred
-  );
-
-  event StartStakeEvent(
-    uint256 nAmount,
-    uint256 nDays
-  );
-
-	event CompoundInterestEvent(
-		uint256 nInterestCompounded
-	);
-
-  event EndStakeEvent(
-    uint256 nPrincipal,
-    uint256 nPayout,
-    uint256 nDaysServed,
-    uint256 nPenalty,
-    uint256 nStakeShares,
-    uint256 nDaysCommitted
-  );
-
-  event EndStakeForAFriendEvent(
-    uint256 nShares,
-    uint256 tStakeEndTimeCommit
-  );
-
-	event StartEthStakeEvent(
-    uint256 nEthAmount
-  );
-
-	event EndEthStakeEvent(
-    uint256 nPayout
-  );
-
-	/// @dev Returns the number of current stakes for given address.
-	///	@param a_address Address of stake to lookup
-	///	@return The number of stakes.
-	function GetNumberOfStakes(
-		address a_address
-	)
-	external view returns (uint256)
-	{
-		return m_staked[a_address].length;
-	}
-
-	/// @dev Returns the number of current Eth pool stakes for given address.
-	///	@param a_address Address of stake to lookup
-	///	@return The number of stakes.
-	function GetNumberOfEthPoolStakes(
-		address a_address
-	)
-	external view returns (uint256)
-	{
-		return m_EthereumStakers[a_address].length;
-	}
-
-  /// @dev Returns the timestamp until the next daily update
-	///	@return The time until the next daily update.
-	function GetTimeUntilNextDailyUpdate() external view returns (uint256)
-	{
-    uint256 nDay = 1 days;
-		return nDay.sub((block.timestamp.sub(m_tContractLaunchTime)).mod(1 days));
-	}
-
-	/// @dev Calculates difference between 2 timestamps in days
- 	/// @param a_nStartTime beginning timestamp
-  /// @param a_nEndTime ending timestamp
-  /// @return Difference between timestamps in days
-  function DifferenceInDays(
-    uint256 a_nStartTime,
-    uint256 a_nEndTime
-  ) public pure returns (uint256)
-	{
-    return (a_nEndTime.sub(a_nStartTime).div(1 days));
-  }
-
-  /// @dev Calculates the number of days since contract launch for a given timestamp.
-  /// @param a_tTimestamp Timestamp to calculate from
-  /// @return Number of days into contract
-  function TimestampToDaysSinceLaunch(
-    uint256 a_tTimestamp
-  ) public view returns (uint256)
-	{
-    return (a_tTimestamp.sub(m_tContractLaunchTime).div(1 days));
-  }
-
-  /// @dev Gets the number of days since the launch of the contract
-  /// @return Number of days since contract launch
-  function DaysSinceLaunch() public view returns (uint256)
-	{
-    return (TimestampToDaysSinceLaunch(block.timestamp));
-  }
-
-  /// @dev Checks if we're still in the claimable phase (first 52 weeks)
-  /// @return Boolean on if we are still in the claimable phase
-  function IsClaimablePhase() public view returns (bool)
-	{
-    return (DaysSinceLaunch() < 364);
-  }
-
-	/// @dev Starts a 1 day stake in the ETH pool. Requires minimum of 0.01 ETH
-	function StartEthStake() external payable
-	{
-		//Require the minimum value for staking
-		require(msg.value >= 0.01 ether, "ETH Sent not above minimum value");
-
-		require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Eth Pool staking doesn't begin until after the buffer window");
-
-		UpdateDailyData();
-
-		m_EthereumStakers[msg.sender].push(
-      EthStakeStruct(
-        msg.value, // Ethereum staked
-				DaysSinceLaunch()	//Day staked
-      )
+    //Events
+    event ClaimEvent(
+        uint256 nOriginalClaimAmount,
+        uint256 nAmountGranted,
+        uint256 nBonuses,
+	uint256 nPenalties,
+        bool bWasReferred
     );
 
-		emit StartEthStakeEvent(
-      msg.value
+    event StartStakeEvent(
+        uint256 nAmount,
+        uint256 nDays
     );
 
-		m_nTotalEthStaked = m_nTotalEthStaked.add(msg.value);
-  }
-
-	/// @dev The default function
-	function() external payable
-	{
-
-  }
-
-	/// @dev Withdraw CER from the Eth pool after stake has completed
- 	/// @param a_nIndex The index of the stake to be withdrawn
-	function WithdrawFromEthPool(uint256 a_nIndex) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_EthereumStakers[msg.sender].length > a_nIndex, "Eth stake does not exist");
-
-		UpdateDailyData();
-
-		uint256 nDay = m_EthereumStakers[msg.sender][a_nIndex].nDay;
-
-		require(nDay < DaysSinceLaunch(), "Must wait until next day to withdraw");
-
-		uint256 nAmount = m_EthereumStakers[msg.sender][a_nIndex].nAmount;
-
-		uint256 nPayoutAmount = m_dailyDataMap[nDay].nPayoutAmount.div(10);	//10%
-
-		uint256 nEthPoolPayout = nPayoutAmount.mul(nAmount)
-			.div(m_dailyDataMap[nDay].nTotalEthStaked);
-
-		_mint(msg.sender, nEthPoolPayout);
-
-		emit EndEthStakeEvent(
-      nEthPoolPayout
+    event CompoundInterestEvent(
+        uint256 nInterestCompounded
     );
 
-		uint256 nEndingIndex = m_EthereumStakers[msg.sender].length.sub(1);
+    event EndStakeEvent(
+        uint256 nPrincipal,
+        uint256 nPayout,
+        uint256 nDaysServed,
+        uint256 nPenalty,
+        uint256 nStakeShares,
+        uint256 nDaysCommitted
+    );
 
-    //Only copy if we aren't removing the last index
-    if(nEndingIndex != a_nIndex)
+    event EndStakeForAFriendEvent(
+        uint256 nShares,
+        uint256 tStakeEndTimeCommit
+    );
+
+    event StartEthStakeEvent(
+        uint256 nEthAmount
+    );
+
+    event EndEthStakeEvent(
+        uint256 nPayout
+    );
+
+    /// @dev Returns the number of current stakes for given address.
+    ///	@param a_address Address of stake to lookup
+    ///	@return The number of stakes.
+    function GetNumberOfStakes(
+        address a_address
+    )
+    external view returns (uint256)
     {
-      //Copy last stake in array over stake we are removing
-      m_EthereumStakers[msg.sender][a_nIndex] = m_EthereumStakers[msg.sender][nEndingIndex];
+        return m_staked[a_address].length;
     }
 
-    //Lower array length by 1
-    m_EthereumStakers[msg.sender].length = nEndingIndex;
-	}
+    /// @dev Returns the number of current Eth pool stakes for given address.
+    ///	@param a_address Address of stake to lookup
+    ///	@return The number of stakes.
+    function GetNumberOfEthPoolStakes(
+        address a_address
+    )
+    external view returns (uint256)
+    {
+        return m_EthereumStakers[a_address].length;
+    }
 
-	/// @dev Transfers ETH in the contract to the genesis address
-	/// Only callable once every 12 weeks.
-	function TransferContractETH() external
-  {
-  	require(address(this).balance != 0, "No Eth to transfer");
+    /// @dev Returns the timestamp until the next daily update
+    ///	@return The time until the next daily update.
+    function GetTimeUntilNextDailyUpdate() external view returns (uint256)
+    {
+        uint256 nDay = 1 days;
+	return nDay.sub((block.timestamp.sub(m_tContractLaunchTime)).mod(1 days));
+    }
 
-		require(m_nLastEthWithdrawalTime.add(12 weeks) <= block.timestamp, "Can only withdraw once every 3 months");
+    /// @dev Calculates difference between 2 timestamps in days
+    /// @param a_nStartTime beginning timestamp
+    /// @param a_nEndTime ending timestamp
+    /// @return Difference between timestamps in days
+    function DifferenceInDays(
+        uint256 a_nStartTime,
+        uint256 a_nEndTime
+    ) public pure returns (uint256)
+    {
+        return (a_nEndTime.sub(a_nStartTime).div(1 days));
+    }
 
-    m_EthGenesis.transfer(address(this).balance);
+    /// @dev Calculates the number of days since contract launch for a given timestamp.
+    /// @param a_tTimestamp Timestamp to calculate from
+    /// @return Number of days into contract
+    function TimestampToDaysSinceLaunch(
+        uint256 a_tTimestamp
+    ) public view returns (uint256)
+    {
+        return (a_tTimestamp.sub(m_tContractLaunchTime).div(1 days));
+    }
 
-		m_nLastEthWithdrawalTime = block.timestamp;
-  }
+    /// @dev Gets the number of days since the launch of the contract
+    /// @return Number of days since contract launch
+    function DaysSinceLaunch() public view returns (uint256)
+    {
+        return (TimestampToDaysSinceLaunch(block.timestamp));
+    }
 
-	/// @dev Updates and stores the global interest for each day.
-	/// Additionally adds the frenzy/prosperous bonuses and the Early/Late unstake penalties.
-	/// This function gets called at the start of popular public functions to continuously update.
-  function UpdateDailyData() public
-	{
-    for(m_nLastUpdatedDay; DaysSinceLaunch() > m_nLastUpdatedDay; m_nLastUpdatedDay++)
-		{
-			//Gives 5% inflation per 365 days
-      uint256 nPayoutRound = totalSupply().div(7300);
+    /// @dev Checks if we're still in the claimable phase (first 52 weeks)
+    /// @return Boolean on if we are still in the claimable phase
+    function IsClaimablePhase() public view returns (bool)
+    {
+        return (DaysSinceLaunch() < 364);
+    }
 
-      uint256 nUnclaimedCoins = 0;
-    	//Frenzy/Prosperous bonuses and Unclaimed redistribution only available during claims phase.
-      if(m_nLastUpdatedDay < 364)
-			{
-        nUnclaimedCoins = m_nMaxRedeemable.sub(m_nTotalRedeemed);
-				nUnclaimedCoins = GetRobinHoodMonthlyAmount(nUnclaimedCoins, m_nLastUpdatedDay);
+    /// @dev Starts a 1 day stake in the ETH pool. Requires minimum of 0.01 ETH
+    function StartEthStake() external payable
+    {
+        //Require the minimum value for staking
+	require(msg.value >= 0.01 ether, "ETH Sent not above minimum value");
 
-        nPayoutRound = nPayoutRound.add(nUnclaimedCoins);
+	require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Eth Pool staking doesn't begin until after the buffer window");
 
-        nPayoutRound = nPayoutRound.add(
-          //Frenzy bonus 0-100% based on total users claiming
-          nPayoutRound.mul(m_nRedeemedCount).div(m_nUTXOCountAtSnapshot)
-        ).add(
-          //Prosperous bonus 0-100% based on size of claims
-          nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)
+	UpdateDailyData();
+
+	m_EthereumStakers[msg.sender].push(
+            EthStakeStruct(
+                msg.value, // Ethereum staked
+	        DaysSinceLaunch()	//Day staked
+            )
         );
 
-        //Pay frenzy and Prosperous bonuses to genesis address
-        _mint(m_genesis, nPayoutRound.mul(m_nRedeemedCount).div(m_nUTXOCountAtSnapshot)); // Frenzy
-        _mint(m_genesis, nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)); // Prosperous
-      }
-			else
+	emit StartEthStakeEvent(
+            msg.value
+        );
+
+	m_nTotalEthStaked = m_nTotalEthStaked.add(msg.value);
+    }
+
+    /// @dev The default function
+    function() external payable
+    {
+
+    }
+
+    /// @dev Withdraw CER from the Eth pool after stake has completed
+    /// @param a_nIndex The index of the stake to be withdrawn
+    function WithdrawFromEthPool(uint256 a_nIndex) external
+    {
+        //Require that the stake index doesn't go out of bounds
+	require(m_EthereumStakers[msg.sender].length > a_nIndex, "Eth stake does not exist");
+
+	UpdateDailyData();
+
+	uint256 nDay = m_EthereumStakers[msg.sender][a_nIndex].nDay;
+
+	require(nDay < DaysSinceLaunch(), "Must wait until next day to withdraw");
+
+	uint256 nAmount = m_EthereumStakers[msg.sender][a_nIndex].nAmount;
+
+	uint256 nPayoutAmount = m_dailyDataMap[nDay].nPayoutAmount.div(10);	//10%
+
+	uint256 nEthPoolPayout = nPayoutAmount.mul(nAmount)
+	    .div(m_dailyDataMap[nDay].nTotalEthStaked);
+
+	_mint(msg.sender, nEthPoolPayout);
+
+	emit EndEthStakeEvent(
+            nEthPoolPayout
+        );
+
+	uint256 nEndingIndex = m_EthereumStakers[msg.sender].length.sub(1);
+
+        //Only copy if we aren't removing the last index
+        if(nEndingIndex != a_nIndex)
+        {
+            //Copy last stake in array over stake we are removing
+            m_EthereumStakers[msg.sender][a_nIndex] = m_EthereumStakers[msg.sender][nEndingIndex];
+        }
+
+        //Lower array length by 1
+        m_EthereumStakers[msg.sender].length = nEndingIndex;
+    }
+
+    /// @dev Transfers ETH in the contract to the genesis address
+    /// Only callable once every 12 weeks.
+    function TransferContractETH() external
+    {
+        require(address(this).balance != 0, "No Eth to transfer");
+
+	require(m_nLastEthWithdrawalTime.add(12 weeks) <= block.timestamp, "Can only withdraw once every 3 months");
+
+        m_EthGenesis.transfer(address(this).balance);
+
+	m_nLastEthWithdrawalTime = block.timestamp;
+    }
+
+    /// @dev Updates and stores the global interest for each day.
+    /// Additionally adds the frenzy/prosperous bonuses and the Early/Late unstake penalties.
+    /// This function gets called at the start of popular public functions to continuously update.
+    function UpdateDailyData() public
+    {
+        for(m_nLastUpdatedDay; DaysSinceLaunch() > m_nLastUpdatedDay; m_nLastUpdatedDay++)
+	{
+	    //Gives 5% inflation per 365 days
+            uint256 nPayoutRound = totalSupply().div(7300);
+
+            uint256 nUnclaimedCoins = 0;
+    	    //Frenzy/Prosperous bonuses and Unclaimed redistribution only available during claims phase.
+            if(m_nLastUpdatedDay < 364)
+	    {
+                nUnclaimedCoins = m_nMaxRedeemable.sub(m_nTotalRedeemed);
+		nUnclaimedCoins = GetRobinHoodMonthlyAmount(nUnclaimedCoins, m_nLastUpdatedDay);
+
+                nPayoutRound = nPayoutRound.add(nUnclaimedCoins);
+
+                nPayoutRound = nPayoutRound.add(
+                    //Frenzy bonus 0-100% based on total users claiming
+                    nPayoutRound.mul(m_nRedeemedCount).div(m_nUTXOCountAtSnapshot)
+                ).add(
+                    //Prosperous bonus 0-100% based on size of claims
+                    nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)
+                );
+
+                //Pay frenzy and Prosperous bonuses to genesis address
+                _mint(m_genesis, nPayoutRound.mul(m_nRedeemedCount).div(m_nUTXOCountAtSnapshot)); // Frenzy
+                _mint(m_genesis, nPayoutRound.mul(m_nTotalRedeemed).div(m_nAdjustedMaxRedeemable)); // Prosperous
+            }
+	    else
 			{
 				//If we are not in the claimable phase anymore apply the voted on interest multiplier
 
