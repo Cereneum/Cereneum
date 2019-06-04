@@ -16,14 +16,14 @@ contract CereneumData is ERC20
     bytes32[5] public m_hMerkleTreeRootsArray;
 
     //Total number of UTXO's at snapshot. Used for calculating bonus rewards.
-    uint256 public constant m_nUTXOCountAtSnapshot = 59385204;	//TODO ON LAUNCH DAY
+    uint256 public constant m_nUTXOCountAtSnapshot = 85997439;
 
     //Maximum number of redeemable coins at snapshot.
-    uint256 public constant m_nMaxRedeemable = 19853569666600000;	//TODO ON LAUNCH DAY
+    uint256 public constant m_nMaxRedeemable = 21275254524468718;
 
     //For Prosperous bonus we need to use the adjusted redeemable amount
     //That has the whale penalties applied (lowering claimable supply)
-    uint256 public constant m_nAdjustedMaxRedeemable = 13282331288000131;  //TODO ON LAUNCH DAY
+    uint256 public constant m_nAdjustedMaxRedeemable = 15019398043400000;
 
     //Genesis Address
     address constant internal m_genesis = 0xb26165df612B1c9dc705B9872178B3F48151b24d;
