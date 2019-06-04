@@ -8,11 +8,11 @@ function writeJsonFile(path, json) {
 module.exports = function(deployer) {
   deployer.deploy(
     Cereneum,
-    "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
-    "0xe816fb9a191ac8d5566f243b6b7601022b527677d70c21e1587eec833644993b",
-    "0xa4a114e9ab202fd0a5aefa0f09a0fcfeb111326c4c86f9af35b9a871647b5225",
-    "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
-    "0x822abb98d787964d17e124774efdd64f8687a0cfc43c8610094db621070066c7",).then(() => {
+    "0xed75cf5df074fdf60702bfbf75049d53ebe942e09ad9fe1b1467df516dd3fb5b",
+    "0x55578a1969d16ed5dfc2c0db358da80d4120a2f03a17416f6f65872769c048a7",
+    "0xede6b23f247125725e4bc5d6a1780c5278032508ba4a5d475daf91622aa1fe25",
+    "0x7023649ffe4d83823ac2f3fa1303affde4de4737b07d9d4830270206f246be77",
+    "0xaaa30c59d92230d02247a811c2812e378a4ffb29e64a54407d00fc6d7b269f33",).then(() => {
       writeJsonFile('Cereneum-ABI.json', Cereneum.abi);
   });
 };
