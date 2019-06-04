@@ -3,10 +3,10 @@ const Cereneum = artifacts.require("Cereneum");
 var g_n7DayStakeAmount = 0;
 var ONE_YEAR_PAYOUT = 781980;
 var ONE_YEAR_PAYOUT_TWO_CLAIMS = 782102;
-var fBCHRatio = 0.03402;
-var fBSVRatio = 0.01501;
-var fETHRatio = 0.04131;
-var fLTCRatio = 0.01612;
+var fBCHRatio = 0.05128;
+var fBSVRatio = 0.02263;
+var fETHRatio = 0.03106;
+var fLTCRatio = 0.01311;
 
 contract('Cereneum', (accounts) => {
   it('TestEthPoolMultipleStakes', async () => {
@@ -138,54 +138,54 @@ contract('Cereneum', (accounts) => {
       ethRatio = parseFloat(ethRatio);
 
       //Binance
-      assert(parseInt(await cereneumInstance.balanceOf("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"),10) == Math.floor(parseInt(8339472538853, 10) * 1.30 * ethRatio), "Binance 1 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0xD551234Ae421e3BCBA99A0Da6d736074f22192FF"),10) == Math.floor(parseInt(1479588273675, 10) * 1.30 * ethRatio)-1, "Binance 2 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0x564286362092D8e7936f0549571a803B203aAceD"),10) == Math.floor(parseInt(1113952670976, 10) * 1.30 * ethRatio)-1, "Binance 3 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF"),10) == Math.floor(parseInt(1452680420343, 10) * 1.30 * ethRatio)-1, "Binance 4 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67"),10) == Math.floor(parseInt(235660201854981, 10) * 1.30 * ethRatio)-2, "Binance 6 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE"),10) == Math.floor(parseInt(17400347788910, 10) * 1.30 * ethRatio)-1, "Binance 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0xD551234Ae421e3BCBA99A0Da6d736074f22192FF"),10) == Math.floor(parseInt(6758097982665, 10) * 1.30 * ethRatio)-1, "Binance 2 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x564286362092D8e7936f0549571a803B203aAceD"),10) == Math.floor(parseInt(5557947334680, 10) * 1.30 * ethRatio), "Binance 3 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF"),10) == Math.floor(parseInt(5953786344335, 10) * 1.30 * ethRatio), "Binance 4 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67"),10) == Math.floor(parseInt(779918770916450, 10) * 1.30 * ethRatio), "Binance 6 balance incorrect");
 
       //Bittrex
-      assert(parseInt(await cereneumInstance.balanceOf("0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98"),10) == Math.floor(parseInt(12123238705510, 10) * 1.30 * ethRatio)-2, "Bittrex 1 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0x66f820a414680B5bcda5eECA5dea238543F42054"),10) == Math.floor(parseInt(130000160894256, 10) * 1.30 * ethRatio)-1, "Bittrex 3 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0xFBb1b73C4f0BDa4f67dcA266ce6Ef42f520fBB98"),10) == Math.floor(parseInt(84975797259280, 10) * 1.30 * ethRatio)-1, "Bittrex 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x66f820a414680B5bcda5eECA5dea238543F42054"),10) == Math.floor(parseInt(651875804471280, 10) * 1.30 * ethRatio)-1, "Bittrex 3 balance incorrect");
 
       //KuCoin
-      assert(parseInt(await cereneumInstance.balanceOf("0x2B5634C42055806a59e9107ED44D43c426E58258"),10) == Math.floor(parseInt(620244132323, 10) * 1.30 * ethRatio)-1, "KuCoin 1 balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0x689C56AEf474Df92D44A1B70850f808488F9769C"),10) == Math.floor(parseInt(1170133827906, 10) * 1.30 * ethRatio)-1, "KuCoin 2 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x2B5634C42055806a59e9107ED44D43c426E58258"),10) == Math.floor(parseInt(6609673761160, 10) * 1.30 * ethRatio)-1, "KuCoin 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x689C56AEf474Df92D44A1B70850f808488F9769C"),10) == Math.floor(parseInt(4378334643430, 10) * 1.30 * ethRatio)-2, "KuCoin 2 balance incorrect");
 
       //LAToken
-      assert(parseInt(await cereneumInstance.balanceOf("0x7891b20c690605f4e370d6944c8a5dbfac5a451c"),10) == Math.floor(parseInt(1024359199440, 10) * 1.30 * ethRatio)-2, "LaToken 1 balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x7891b20c690605f4e370d6944c8a5dbfac5a451c"),10) == Math.floor(parseInt(6754951284855, 10) * 1.30 * ethRatio)-1, "LaToken 1 balance incorrect");
 
       //Huobi Global
-      assert(parseInt(await cereneumInstance.balanceOf("0xDc76CD25977E0a5Ae17155770273aD58648900D3"),10) == Math.floor(parseInt(85086064196888, 10) * 1.30 * ethRatio)-1, "Huobi Global balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0xDc76CD25977E0a5Ae17155770273aD58648900D3"),10) == Math.floor(parseInt(427305320984440, 10) * 1.30 * ethRatio), "Huobi Global balance incorrect");
 
       //CoinBene
-      assert(parseInt(await cereneumInstance.balanceOf("0x33683b94334eeBc9BD3EA85DDBDA4a86Fb461405"),10) == Math.floor(parseInt(317547644511, 10) * 1.30 * ethRatio)-2, "CoinBene balance incorrect");
+      assert(parseInt(await cereneumInstance.balanceOf("0x33683b94334eeBc9BD3EA85DDBDA4a86Fb461405"),10) == Math.floor(parseInt(2414794474090, 10) * 1.30 * ethRatio), "CoinBene balance incorrect");
 
-      assert(parseInt(await cereneumInstance.balanceOf("0x8eAf4Fec503da352EB66Ef1E2f75C63e5bC635e1"), 10) == Math.floor(parseInt(8339472538853, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(1479588273675, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(1113952670976, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(1452680420343, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(235660201854981, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(12123238705510, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(130000160894256, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(620244132323, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(1170133827906, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(1024359199440, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(85086064196888, 10) * .20 * ethRatio) +
-        Math.floor(parseInt(317547644511, 10) * .20 * ethRatio),
+      assert(parseInt(await cereneumInstance.balanceOf("0x8eAf4Fec503da352EB66Ef1E2f75C63e5bC635e1"), 10) == Math.floor(parseInt(17400347788910, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(6758097982665, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(5557947334680, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(5953786344335, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(779918770916450, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(84975797259280, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(651875804471280, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(6609673761160, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(4378334643430, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(6754951284855, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(427305320984440, 10) * .20 * ethRatio) +
+        Math.floor(parseInt(2414794474090, 10) * .20 * ethRatio)+1,
         "Referral balance incorrect");
-      assert(parseInt(await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d"), 10) == Math.floor(parseInt(8339472538853, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(1479588273675, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(1113952670976, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(1452680420343, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(235660201854981, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(12123238705510, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(130000160894256, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(620244132323, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(1170133827906, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(1024359199440, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(85086064196888, 10) * .50 * ethRatio) +
-      Math.floor(parseInt(317547644511, 10) * .50 * ethRatio)-7,
+      assert(parseInt(await cereneumInstance.balanceOf("0xb26165df612B1c9dc705B9872178B3F48151b24d"), 10) == Math.floor(parseInt(17400347788910, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(6758097982665, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(5557947334680, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(5953786344335, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(779918770916450, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(84975797259280, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(651875804471280, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(6609673761160, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(4378334643430, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(6754951284855, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(427305320984440, 10) * .50 * ethRatio) +
+      Math.floor(parseInt(2414794474090, 10) * .50 * ethRatio)-1,
       "Genesis balance incorrect");
   });
   it('TestSupply', async () => {
@@ -196,7 +196,7 @@ contract('Cereneum', (accounts) => {
       "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
       "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
 
-    assert(await cereneumInstance.totalSupply() == 19853569666600000);
+    assert(await cereneumInstance.totalSupply() == 21275254524468718);
     assert(await cereneumInstance.GetCirculatingSupply() == 0);
   });
   it('TestRobinHoodBonus', async () => {
@@ -854,8 +854,8 @@ contract('Cereneum', (accounts) => {
       if(logs[i].event == "ClaimEvent")
       {
           assert(73349 == parseInt(logs[i].args[0], 16));
-          assert(Math.floor(73349 * 0.03402) == parseInt(logs[i].args[1], 16), "Incorrect claim amount");  //day 1 redeem gets 20% bonus
-          assert(Math.floor(73349 * .20 * 0.03402) == parseInt(logs[i].args[2], 16), "20% speed bonus failed");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(73349 * fBCHRatio) == parseInt(logs[i].args[1], 16), "Incorrect claim amount");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(73349 * .20 * fBCHRatio) == parseInt(logs[i].args[2], 16), "20% speed bonus failed");  //day 1 redeem gets 20% bonus
           assert(0 == parseInt(logs[i].args[3], 16), "Penalty incorrect");
           assert(false == logs[i].args[4], "referrer incorrect");
       }
@@ -1363,8 +1363,8 @@ contract('Cereneum', (accounts) => {
       if(logs[i].event == "ClaimEvent")
       {
           assert(150000000000004 == parseInt(logs[i].args[0], 16));
-          assert(Math.floor(150000000000004 * 0.03402) == parseInt(logs[i].args[1], 16), "Incorrect claim amount");  //day 1 redeem gets 20% bonus
-          assert(Math.floor(150000000000004 * .20 * 0.03402) == parseInt(logs[i].args[2], 16), "20% speed bonus failed");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(150000000000004 * fBCHRatio) == parseInt(logs[i].args[1], 16), "Incorrect claim amount");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(150000000000004 * .20 * fBCHRatio) == parseInt(logs[i].args[2], 16), "20% speed bonus failed");  //day 1 redeem gets 20% bonus
           assert(0 == parseInt(logs[i].args[3], 16), "Penalty incorrect");
           assert(false == logs[i].args[4]);
       }
@@ -1641,7 +1641,7 @@ contract('Cereneum', (accounts) => {
       {
           assert(3000000 == parseInt(logs[i].args[0], 16));
           assert(Math.floor(3000000 * fLTCRatio) == parseInt(logs[i].args[1], 16), "incorrect claim amount");
-          assert(Math.floor(3000000 * .30 * fLTCRatio)+1 == parseInt(logs[i].args[2], 16), "20% speed bonus + 10% referral bonus failed");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(3000000 * .30 * fLTCRatio) == parseInt(logs[i].args[2], 16), "20% speed bonus + 10% referral bonus failed");  //day 1 redeem gets 20% bonus
           assert(0 == parseInt(logs[i].args[3], 16), "Penalty incorrect");
           assert(true == logs[i].args[4], "referrer incorrect");
       }
@@ -1653,7 +1653,7 @@ contract('Cereneum', (accounts) => {
 
     assert(nGenesisBalance == parseInt(3000000 * 0.50 * fLTCRatio, 10), "Genesis balance incorrect");
     assert(nAccount1Balance == parseInt(3000000 * 0.20 * fLTCRatio, 10), "Referral balance incorrect");
-    assert(nAccountBalance == parseInt(3000000 * 1.30 * fLTCRatio, 10)+1, "Claim balance incorrect");
+    assert(nAccountBalance == parseInt(3000000 * 1.30 * fLTCRatio, 10), "Claim balance incorrect");
     assert(await cereneumInstance.GetCirculatingSupply() == nGenesisBalance + nAccountBalance + nAccount1Balance, "Circulating supply incorrect");
   });
   it('TestSelfReferralBonus', async () => {
@@ -1710,7 +1710,7 @@ contract('Cereneum', (accounts) => {
       {
           assert(3000000 == parseInt(logs[i].args[0], 16));
           assert(Math.floor(3000000 * fLTCRatio) == parseInt(logs[i].args[1], 16), "incorrect claim amount");
-          assert(Math.floor(3000000 * .30 * fLTCRatio)+1 == parseInt(logs[i].args[2], 16), "20% speed bonus + 10% referral bonus failed");  //day 1 redeem gets 20% bonus
+          assert(Math.floor(3000000 * .30 * fLTCRatio) == parseInt(logs[i].args[2], 16), "20% speed bonus + 10% referral bonus failed");  //day 1 redeem gets 20% bonus
           assert(0 == parseInt(logs[i].args[3], 16), "Penalty incorrect");
           assert(true == logs[i].args[4], "referrer incorrect");
       }
@@ -2158,7 +2158,7 @@ contract('Cereneum', (accounts) => {
 
     var nAcct1newBalanceAfterStake = await cereneumInstance.balanceOf(accounts[1]);
 
-    assert(parseInt(nAcct1newBalanceAfterStake,10)+3 == (parseInt(Math.floor(nPayoutRound*(100/204)),10) + parseInt(nAcct1BalanceAfterStake,10)), "5) Balance after stake incorrect");
+    assert(parseInt(nAcct1newBalanceAfterStake,10)+2 == (parseInt(Math.floor(nPayoutRound*(100/204)),10) + parseInt(nAcct1BalanceAfterStake,10)), "5) Balance after stake incorrect");
   });
   //The most basic test of a stake completing
   it('TestStandardStake', async () => {
@@ -3879,7 +3879,7 @@ contract('Cereneum', (accounts) => {
         assert(nBalanceAfterEndStake == (parseInt(nBalanceAfterStake, 10) + parseInt(nStakeAmount, 10) +
           parseInt(nPayout, 10)));
 
-        assert(1948 == await cereneumInstance.balanceOf(cereneumInstance.address), "Contract balance incorrect");
+        assert(2100 == await cereneumInstance.balanceOf(cereneumInstance.address), "Contract balance incorrect");
     });
     //Basic test for payouts where there are only two claims in the first year
     it('TestCalculatePayoutTwoClaims', async () => {
@@ -4979,7 +4979,7 @@ contract('Cereneum', (accounts) => {
       var nAccount3AfterEndStake = await cereneumInstance.balanceOf(accounts[3]);
 
       //Slightly off from claim 3 being a late claim
-      assert(parseInt(nAccount3AfterEndStake,10)+8 == (parseInt(nPayoutTotal,10) + parseInt(nNewBalanceAfterClaim,10)), "nAccount3AfterEndStake incorrect");
+      assert(parseInt(nAccount3AfterEndStake,10)+9 == (parseInt(nPayoutTotal,10) + parseInt(nNewBalanceAfterClaim,10)), "nAccount3AfterEndStake incorrect");
     });
     //Account 1 will stake for a year
     //2 years will pass
@@ -5192,10 +5192,10 @@ contract('Cereneum', (accounts) => {
 
       var nSatoshiAmountAtLaunch = parseInt(await cereneumInstance.totalSupply(),10);
 
+      assert(await cereneumInstance.balanceOf(cereneumInstance.address) == (parseInt(nSatoshiAmountAtLaunch,10) - parseInt(nClaimAmount*1.2,10)), "Contract balance incorrect");
+
       //Adjust for buffer window
       await cereneumInstance.testAdjustContractLaunchTime(14);
-
-      assert(await cereneumInstance.balanceOf(cereneumInstance.address) == (parseInt(nSatoshiAmountAtLaunch,10) - parseInt(nClaimAmount*1.4,10)), "Contract balance incorrect");
 
       var nBalanceAfterClaim = await cereneumInstance.balanceOf(accounts[1]);
       assert(nBalanceAfterClaim == Math.floor(Math.floor(nClaimAmount*1.2)));
@@ -5230,7 +5230,7 @@ contract('Cereneum', (accounts) => {
 
       await cereneumInstance.EndStakeSafely(0, {from: accounts[1]});
       assert(await cereneumInstance.balanceOf(cereneumInstance.address) >= 0);
-      assert(await cereneumInstance.balanceOf(cereneumInstance.address) < 2000, "Ending contract balance incorrect");  //Contract balance should be very low
+      assert(await cereneumInstance.balanceOf(cereneumInstance.address) < 3000, "Ending contract balance incorrect");  //Contract balance should be very low
     });
 
 
