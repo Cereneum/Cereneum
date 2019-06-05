@@ -769,596 +769,596 @@ contract CereneumImplementation is CereneumData
         return a_nAmount.mul(nMaxDays.sub(nDaysSinceLaunch)).div(nMaxDays);
     }
 
-	/// @dev Gets the redeem amount with the blockchain ratio applied.
-	/// @param a_nAmount Amount of UTXO in satoshis
-	/// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Amount with blockchain ratio applied
-	function GetRedeemRatio(uint256 a_nAmount, BlockchainType a_nWhichChain) internal view returns (uint256)
+    /// @dev Gets the redeem amount with the blockchain ratio applied.
+    /// @param a_nAmount Amount of UTXO in satoshis
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Amount with blockchain ratio applied
+    function GetRedeemRatio(uint256 a_nAmount, BlockchainType a_nWhichChain) internal view returns (uint256)
+    {
+        if(a_nWhichChain != BlockchainType.Bitcoin)
 	{
-		if(a_nWhichChain != BlockchainType.Bitcoin)
-		{
-			uint8 nWhichChain = uint8(a_nWhichChain);
-			--nWhichChain;
+	    uint8 nWhichChain = uint8(a_nWhichChain);
+	    --nWhichChain;
 
-			//Many zeros to avoid rounding errors
-			uint256 nScalar = 100000000000000000;
+	    //Many zeros to avoid rounding errors
+	    uint256 nScalar = 100000000000000000;
 
-			uint256 nRatio = nScalar.div(m_blockchainRatios[nWhichChain]);
+	    uint256 nRatio = nScalar.div(m_blockchainRatios[nWhichChain]);
 
-			a_nAmount = a_nAmount.mul(1000000000000).div(nRatio);
-		}
-
-		return a_nAmount;
+	    a_nAmount = a_nAmount.mul(1000000000000).div(nRatio);
 	}
 
-  /// @dev Gets the redeem amount and bonuses based on time since contract launch
-  /// @param a_nAmount Amount of UTXO in satoshis
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Claim amount, bonuses and penalty
-  function GetRedeemAmount(uint256 a_nAmount, BlockchainType a_nWhichChain) public view returns (uint256, uint256, uint256)
-	{
-    a_nAmount = GetRedeemRatio(a_nAmount, a_nWhichChain);
+	return a_nAmount;
+    }
 
-    uint256 nAmount = GetLateClaimAmount(a_nAmount);
-    uint256 nBonus = GetSpeedBonus(a_nAmount);
-
-    return (nAmount, nBonus, a_nAmount.sub(nAmount));
-  }
-
-	/// @dev Verify claim ownership from signed message
-	/// @param a_nAmount Amount of UTXO claim
-	/// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-	/// @param a_addressClaiming Ethereum address within signed message
-	/// @param a_pubKeyX First half of uncompressed ECDSA public key from signed message
-	/// @param a_pubKeyY Second half of uncompressed ECDSA public key from signed message
-  /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address
-	/// @param a_v v parameter of ECDSA signature
-	/// @param a_r r parameter of ECDSA signature
-	/// @param a_s s parameter of ECDSA signature
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  function ValidateOwnership(
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    address a_addressClaiming,
-    bytes32 a_pubKeyX,
-    bytes32 a_pubKeyY,
-    AddressType a_nAddressType,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    BlockchainType a_nWhichChain
-  ) internal
-	{
-    //Calculate the UTXO Merkle leaf hash for the correct chain
-    bytes32 hMerkleLeafHash;
-    if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin have the same raw address format
+    /// @dev Gets the redeem amount and bonuses based on time since contract launch
+    /// @param a_nAmount Amount of UTXO in satoshis
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Claim amount, bonuses and penalty
+    function GetRedeemAmount(uint256 a_nAmount, BlockchainType a_nWhichChain) public view returns (uint256, uint256, uint256)
     {
-      hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToBitcoinAddress(a_pubKeyX, a_pubKeyY, a_nAddressType), a_nAmount));
+        a_nAmount = GetRedeemRatio(a_nAmount, a_nWhichChain);
+
+        uint256 nAmount = GetLateClaimAmount(a_nAmount);
+        uint256 nBonus = GetSpeedBonus(a_nAmount);
+
+        return (nAmount, nBonus, a_nAmount.sub(nAmount));
     }
-    else //Otherwise ETH
+
+    /// @dev Verify claim ownership from signed message
+    /// @param a_nAmount Amount of UTXO claim
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_addressClaiming Ethereum address within signed message
+    /// @param a_pubKeyX First half of uncompressed ECDSA public key from signed message
+    /// @param a_pubKeyY Second half of uncompressed ECDSA public key from signed message
+    /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    function ValidateOwnership(
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        address a_addressClaiming,
+        bytes32 a_pubKeyX,
+        bytes32 a_pubKeyY,
+        AddressType a_nAddressType,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        BlockchainType a_nWhichChain
+    ) internal
     {
-      hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToEthereumAddress(a_pubKeyX, a_pubKeyY), a_nAmount));
+        //Calculate the UTXO Merkle leaf hash for the correct chain
+        bytes32 hMerkleLeafHash;
+        if(a_nWhichChain != BlockchainType.Ethereum)  //All Bitcoin chains and Litecoin have the same raw address format
+        {
+            hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToBitcoinAddress(a_pubKeyX, a_pubKeyY, a_nAddressType), a_nAmount));
+        }
+        else //Otherwise ETH
+        {
+            hMerkleLeafHash = keccak256(abi.encodePacked(PublicKeyToEthereumAddress(a_pubKeyX, a_pubKeyY), a_nAmount));
+        }
+
+        //Require that the UTXO can be redeemed
+        require(CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain), "UTXO Cannot be redeemed.");
+
+        //Verify the ECDSA parameters match the signed message
+        require(
+            ECDSAVerify(
+                a_addressClaiming,
+                a_pubKeyX,
+                a_pubKeyY,
+                a_v,
+                a_r,
+                a_s,
+                a_nWhichChain
+            ),
+	    "ECDSA verification failed."
+        );
+
+        //Save the UTXO as redeemed in the global map
+        m_claimedUTXOsMap[uint8(a_nWhichChain)][hMerkleLeafHash] = true;
     }
 
-    //Require that the UTXO can be redeemed
-    require(CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain), "UTXO Cannot be redeemed.");
+    /// @dev Claim tokens from a UTXO at snapshot block
+    /// granting CER tokens proportional to amount of UTXO.
+    /// BCH, BSV, ETH & LTC chains get proportional BTC ratio awards.
+    /// @param a_nAmount Amount of UTXO
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_addressClaiming The Ethereum address for the claimed CER tokens to be sent to
+    /// @param a_publicKeyX X parameter of uncompressed ECDSA public key from UTXO
+    /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key from UTXO
+    /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
+    /// @param a_v v parameter of ECDSA signature
+    /// @param a_r r parameter of ECDSA signature
+    /// @param a_s s parameter of ECDSA signature
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @param a_referrer Optional address of referrer. Address(0) for no referral
+    /// @return The number of tokens redeemed, if successful
+    function Claim(
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        address a_addressClaiming,
+        bytes32 a_publicKeyX,
+        bytes32 a_publicKeyY,
+        AddressType a_nAddressType,
+        uint8 a_v,
+        bytes32 a_r,
+        bytes32 a_s,
+        BlockchainType a_nWhichChain,
+        address a_referrer
+    ) public returns (uint256)
+    {
+        //No claims after the first 50 weeks of contract launch
+        require(IsClaimablePhase(), "Claim is outside of claims period.");
 
-    //Verify the ECDSA parameters match the signed message
-    require(
-      ECDSAVerify(
-        a_addressClaiming,
-        a_pubKeyX,
-        a_pubKeyY,
-        a_v,
-        a_r,
-        a_s,
-        a_nWhichChain
-      ),
-			"ECDSA verification failed."
-    );
+        require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Incorrect blockchain value.");
 
-    //Save the UTXO as redeemed in the global map
-    m_claimedUTXOsMap[uint8(a_nWhichChain)][hMerkleLeafHash] = true;
-  }
+        require(a_v <= 30 && a_v >= 27, "V parameter is invalid.");
 
-  /// @dev Claim tokens from a UTXO at snapshot block
-  /// granting CER tokens proportional to amount of UTXO.
-  /// BCH, BSV, ETH & LTC chains get proportional BTC ratio awards.
-  /// @param a_nAmount Amount of UTXO
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_addressClaiming The Ethereum address for the claimed CER tokens to be sent to
-  /// @param a_publicKeyX X parameter of uncompressed ECDSA public key from UTXO
-  /// @param a_publicKeyY Y parameter of uncompressed ECDSA public key from UTXO
-  /// @param a_nAddressType Whether BTC/LTC is Legacy or Segwit address and if it was compressed
-  /// @param a_v v parameter of ECDSA signature
-  /// @param a_r r parameter of ECDSA signature
-  /// @param a_s s parameter of ECDSA signature
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @param a_referrer Optional address of referrer. Address(0) for no referral
-  /// @return The number of tokens redeemed, if successful
-  function Claim(
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    address a_addressClaiming,
-    bytes32 a_publicKeyX,
-    bytes32 a_publicKeyY,
-    AddressType a_nAddressType,
-    uint8 a_v,
-    bytes32 a_r,
-    bytes32 a_s,
-    BlockchainType a_nWhichChain,
-    address a_referrer
-  ) public returns (uint256)
+        ValidateOwnership(
+            a_nAmount,
+            a_hMerkleTreeBranches,
+            a_addressClaiming,
+            a_publicKeyX,
+            a_publicKeyY,
+            a_nAddressType,
+            a_v,
+            a_r,
+            a_s,
+            a_nWhichChain
+        );
+
+        UpdateDailyData();
+
+        m_nTotalRedeemed = m_nTotalRedeemed.add(GetRedeemRatio(a_nAmount, a_nWhichChain));
+
+        (uint256 nTokensRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
+
+	//Transfer coins from contracts wallet to claim wallet
+        _transfer(address(this), a_addressClaiming, nTokensRedeemed);
+
+        //Mint speed bonus to claiming address
+        _mint(a_addressClaiming, nBonuses);
+	//Speed bonus matched for genesis address
+        _mint(m_genesis, nBonuses);
+
+        m_nRedeemedCount = m_nRedeemedCount.add(1);
+
+        if(a_referrer != address(0))
 	{
-    //No claims after the first 50 weeks of contract launch
-    require(IsClaimablePhase(), "Claim is outside of claims period.");
+	    //Grant 10% bonus token to the person being referred
+	    _mint(a_addressClaiming, nTokensRedeemed.div(10));
+	    nBonuses = nBonuses.add(nTokensRedeemed.div(10));
 
-    require(uint8(a_nWhichChain) >= 0 && uint8(a_nWhichChain) <= 4, "Incorrect blockchain value.");
+            //Grant 20% bonus of tokens to referrer
+            _mint(a_referrer, nTokensRedeemed.div(5));
 
-    require(a_v <= 30 && a_v >= 27, "V parameter is invalid.");
+	    //Match referral bonus for genesis address (20% for referral and 10% for claimer referral = 30%)
+            _mint(m_genesis, nTokensRedeemed.mul(1000000000000).div(3333333333333));
+        }
 
-    ValidateOwnership(
-      a_nAmount,
-      a_hMerkleTreeBranches,
-      a_addressClaiming,
-      a_publicKeyX,
-      a_publicKeyY,
-      a_nAddressType,
-      a_v,
-      a_r,
-      a_s,
-      a_nWhichChain
-    );
+        emit ClaimEvent(
+            a_nAmount,
+            nTokensRedeemed,
+            nBonuses,
+	    nPenalties,
+            a_referrer != address(0)
+        );
 
-    UpdateDailyData();
-
-    m_nTotalRedeemed = m_nTotalRedeemed.add(GetRedeemRatio(a_nAmount, a_nWhichChain));
-
-    (uint256 nTokensRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
-
-		//Transfer coins from contracts wallet to claim wallet
-    _transfer(address(this), a_addressClaiming, nTokensRedeemed);
-
-    //Mint speed bonus to claiming address
-    _mint(a_addressClaiming, nBonuses);
-		//Speed bonus matched for genesis address
-    _mint(m_genesis, nBonuses);
-
-    m_nRedeemedCount = m_nRedeemedCount.add(1);
-
-    if(a_referrer != address(0))
-		{
-			//Grant 10% bonus token to the person being referred
-			_mint(a_addressClaiming, nTokensRedeemed.div(10));
-			nBonuses = nBonuses.add(nTokensRedeemed.div(10));
-
-      //Grant 20% bonus of tokens to referrer
-      _mint(a_referrer, nTokensRedeemed.div(5));
-
-			//Match referral bonus for genesis address (20% for referral and 10% for claimer referral = 30%)
-      _mint(m_genesis, nTokensRedeemed.mul(1000000000000).div(3333333333333));
+        //Return the number of tokens redeemed
+        return nTokensRedeemed.add(nBonuses);
     }
 
-    emit ClaimEvent(
-      a_nAmount,
-      nTokensRedeemed,
-      nBonuses,
-			nPenalties,
-      a_referrer != address(0)
-    );
+    /// @dev Calculates stake payouts for a given stake
+    /// @param a_nStakeShares Number of shares to calculate payout for
+    /// @param a_tLockTime Starting timestamp of stake
+    /// @param a_tEndTime Ending timestamp of stake
+    /// @return payout amount
+    function CalculatePayout(
+        uint256 a_nStakeShares,
+        uint256 a_tLockTime,
+        uint256 a_tEndTime
+    ) public view returns (uint256)
+    {
+	if(m_nLastUpdatedDay == 0)
+	    return 0;
 
-    //Return the number of tokens redeemed
-    return nTokensRedeemed.add(nBonuses);
-  }
+        uint256 nPayout = 0;
 
-  /// @dev Calculates stake payouts for a given stake
-  /// @param a_nStakeShares Number of shares to calculate payout for
-  /// @param a_tLockTime Starting timestamp of stake
-  /// @param a_tEndTime Ending timestamp of stake
-  /// @return payout amount
-  function CalculatePayout(
-    uint256 a_nStakeShares,
-    uint256 a_tLockTime,
-    uint256 a_tEndTime
-  ) public view returns (uint256)
+	uint256 tStartDay = TimestampToDaysSinceLaunch(a_tLockTime);
+
+        //Calculate what day stake was closed
+        uint256 tEndDay = TimestampToDaysSinceLaunch(a_tEndTime);
+
+        //Iterate through each day and sum up the payout
+        for(uint256 i = tStartDay; i < tEndDay; i++)
 	{
-		if(m_nLastUpdatedDay == 0)
-			return 0;
+            uint256 nDailyPayout = m_dailyDataMap[i].nPayoutAmount.mul(a_nStakeShares)
+                .div(m_dailyDataMap[i].nTotalStakeShares);
 
-    uint256 nPayout = 0;
+            //Keep sum of payouts
+            nPayout = nPayout.add(nDailyPayout);
+        }
 
-		uint256 tStartDay = TimestampToDaysSinceLaunch(a_tLockTime);
-
-    //Calculate what day stake was closed
-    uint256 tEndDay = TimestampToDaysSinceLaunch(a_tEndTime);
-
-    //Iterate through each day and sum up the payout
-    for(uint256 i = tStartDay; i < tEndDay; i++)
-		{
-      uint256 nDailyPayout = m_dailyDataMap[i].nPayoutAmount.mul(a_nStakeShares)
-        .div(m_dailyDataMap[i].nTotalStakeShares);
-
-      //Keep sum of payouts
-      nPayout = nPayout.add(nDailyPayout);
+        return nPayout;
     }
 
-    return nPayout;
-  }
+    /// @dev Updates current amount of stake to apply compounding interest
+    /// @notice This applies all of your earned interest to future payout calculations
+    /// @param a_nStakeIndex index of stake to compound interest for
+    function CompoundInterest(
+        uint256 a_nStakeIndex
+    ) external
+    {
+	require(m_nLastUpdatedDay != 0, "First update day has not finished.");
 
-  /// @dev Updates current amount of stake to apply compounding interest
-	/// @notice This applies all of your earned interest to future payout calculations
-  /// @param a_nStakeIndex index of stake to compound interest for
-  function CompoundInterest(
-		uint256 a_nStakeIndex
-	) external
+        //Get a reference to the stake to save gas from constant map lookups
+        StakeStruct storage rStake = m_staked[msg.sender][a_nStakeIndex];
+
+	require(block.timestamp < rStake.tEndStakeCommitTime, "Stake has already matured.");
+
+	UpdateDailyData();
+
+	uint256 nInterestEarned = CalculatePayout(
+	    rStake.nSharesStaked,
+            rStake.tLastCompoundedUpdateTime,
+	    block.timestamp
+	);
+
+	if(nInterestEarned != 0)
 	{
-		require(m_nLastUpdatedDay != 0, "First update day has not finished.");
+	    rStake.nCompoundedPayoutAccumulated = rStake.nCompoundedPayoutAccumulated.add(nInterestEarned);
+	    rStake.nSharesStaked = rStake.nSharesStaked.add(nInterestEarned);
 
-    //Get a reference to the stake to save gas from constant map lookups
-    StakeStruct storage rStake = m_staked[msg.sender][a_nStakeIndex];
+	    //InterestRateMultiplier votes
+	    m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].add(nInterestEarned);
 
-		require(block.timestamp < rStake.tEndStakeCommitTime, "Stake has already matured.");
+	    m_nTotalStakeShares = m_nTotalStakeShares.add(nInterestEarned);
+	    rStake.tLastCompoundedUpdateTime = block.timestamp;
 
-		UpdateDailyData();
-
-		uint256 nInterestEarned = CalculatePayout(
-			rStake.nSharesStaked,
-		  rStake.tLastCompoundedUpdateTime,
-			block.timestamp
-		);
-
-		if(nInterestEarned != 0)
-		{
-			rStake.nCompoundedPayoutAccumulated = rStake.nCompoundedPayoutAccumulated.add(nInterestEarned);
-			rStake.nSharesStaked = rStake.nSharesStaked.add(nInterestEarned);
-
-			//InterestRateMultiplier votes
-			m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].add(nInterestEarned);
-
-			m_nTotalStakeShares = m_nTotalStakeShares.add(nInterestEarned);
-			rStake.tLastCompoundedUpdateTime = block.timestamp;
-
-			emit CompoundInterestEvent(
-				nInterestEarned
-			);
-		}
-  }
-
-  /// @dev Starts a stake
-  /// @param a_nAmount Amount of token to stake
-  /// @param a_nDays Number of days to stake
-	/// @param a_nInterestMultiplierVote Pooled interest rate to vote for (1-10 => 5%-50% interest)
-  function StartStake(
-    uint256 a_nAmount,
-    uint256 a_nDays,
-		uint8 a_nInterestMultiplierVote
-  ) external
-	{
-		require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Staking doesn't begin until after the buffer window");
-
-    //Verify account has enough tokens
-    require(balanceOf(msg.sender) >= a_nAmount, "Not enough funds for stake.");
-
-    //Don't allow 0 amount stakes
-    require(a_nAmount > 0, "Stake amount must be greater than 0");
-
-		require(a_nDays >= 7, "Stake is under the minimum time required.");
-
-		require(a_nInterestMultiplierVote >= 1 && a_nInterestMultiplierVote <= 10, "Interest multiplier range is 1-10.");
-
-		//Calculate Unlock time
-    uint256 tEndStakeCommitTime = block.timestamp.add(a_nDays.mul(1 days));
-
-    //Don't allow stakes over the maximum stake time
-    require(tEndStakeCommitTime <= block.timestamp.add(m_nMaxStakingTime), "Stake time exceeds maximum.");
-
-    UpdateDailyData();
-
-		//Calculate bonus interest for longer stake periods (20% bonus per year)
-		uint256 nSharesModifier = 0;
-
-		//Minimum stake time of 3 months to get amplifier bonus
-		if(a_nDays >= 90)
-		{
-			//We can't have a fractional modifier such as .5 so we need to use whole numbers and divide later
-			nSharesModifier = a_nDays.mul(2000000).div(365);
-		}
-
-    //50% bonus shares per year of committed stake time
-    uint256 nStakeShares = a_nAmount.add(a_nAmount.mul(nSharesModifier).div(10000000));
-
-    //Create and store the stake
-    m_staked[msg.sender].push(
-      StakeStruct(
-        a_nAmount, // nAmountStaked
-        nStakeShares, // nSharesStaked
-				0,	//Accumulated Payout from CompoundInterest
-        block.timestamp, // tLockTime
-        tEndStakeCommitTime, // tEndStakeCommitTime
-				block.timestamp, //tLastCompoundedUpdateTime
-        0, // tTimeRemovedFromGlobalPool
-				a_nInterestMultiplierVote,
-				true, // bIsInGlobalPool
-        false // bIsLatePenaltyAlreadyPooled
-      )
-    );
-
-    emit StartStakeEvent(
-      a_nAmount,
-      a_nDays
-    );
-
-		//InterestRateMultiplier
-		m_votingMultiplierMap[a_nInterestMultiplierVote] = m_votingMultiplierMap[a_nInterestMultiplierVote].add(nStakeShares);
-
-    //Globally track staked tokens
-    m_nTotalStakedTokens = m_nTotalStakedTokens.add(a_nAmount);
-
-    //Globally track staked shares
-    m_nTotalStakeShares = m_nTotalStakeShares.add(nStakeShares);
-
-    //Transfer staked tokens to contract wallet
-    _transfer(msg.sender, address(this), a_nAmount);
-  }
-
-  /// @dev Calculates penalty for unstaking late
-  /// @param a_tEndStakeCommitTime Timestamp stake matured
-  /// @param a_tTimeRemovedFromGlobalPool Timestamp stake was removed from global pool
-  /// @param a_nInterestEarned Interest earned from stake
-  /// @return penalty value
-  function CalculateLatePenalty(
-    uint256 a_tEndStakeCommitTime,
-    uint256 a_tTimeRemovedFromGlobalPool,
-    uint256 a_nInterestEarned
-  ) public pure returns (uint256)
-	{
-    uint256 nPenalty = 0;
-
-		//One week grace period
-    if(a_tTimeRemovedFromGlobalPool > a_tEndStakeCommitTime.add(1 weeks))
-		{
-      //Penalty is 1% per day after the 1 week grace period
-      uint256 nPenaltyPercent = DifferenceInDays(a_tEndStakeCommitTime.add(1 weeks), a_tTimeRemovedFromGlobalPool);
-
-			//Cap max percent at 100
-			if(nPenaltyPercent > 100)
-			{
-				nPenaltyPercent = 100;
-			}
-
-      //Calculate penalty
-			nPenalty = a_nInterestEarned.mul(nPenaltyPercent).div(100);
+	    emit CompoundInterestEvent(
+	        nInterestEarned
+	    );
+	}
     }
 
-    return nPenalty;
-  }
+    /// @dev Starts a stake
+    /// @param a_nAmount Amount of token to stake
+    /// @param a_nDays Number of days to stake
+    /// @param a_nInterestMultiplierVote Pooled interest rate to vote for (1-10 => 5%-50% interest)
+    function StartStake(
+        uint256 a_nAmount,
+        uint256 a_nDays,
+	uint8 a_nInterestMultiplierVote
+    ) external
+    {
+	require(DaysSinceLaunch() >= m_nClaimPhaseBufferDays, "Staking doesn't begin until after the buffer window");
 
-  /// @dev Calculates penalty for unstaking early
-	/// @param a_tLockTime Starting timestamp of stake
-  /// @param a_nEndStakeCommitTime Timestamp the stake matures
-  /// @param a_nAmount Amount that was staked
-	/// @param a_nInterestEarned Interest earned from stake
-  /// @return penalty value
-  function CalculateEarlyPenalty(
-		uint256 a_tLockTime,
-		uint256 a_nEndStakeCommitTime,
-    uint256 a_nAmount,
-		uint256 a_nInterestEarned
-  ) public view returns (uint256)
+        //Verify account has enough tokens
+        require(balanceOf(msg.sender) >= a_nAmount, "Not enough funds for stake.");
+
+        //Don't allow 0 amount stakes
+        require(a_nAmount > 0, "Stake amount must be greater than 0");
+
+	require(a_nDays >= 7, "Stake is under the minimum time required.");
+
+	require(a_nInterestMultiplierVote >= 1 && a_nInterestMultiplierVote <= 10, "Interest multiplier range is 1-10.");
+
+	//Calculate Unlock time
+        uint256 tEndStakeCommitTime = block.timestamp.add(a_nDays.mul(1 days));
+
+        //Don't allow stakes over the maximum stake time
+        require(tEndStakeCommitTime <= block.timestamp.add(m_nMaxStakingTime), "Stake time exceeds maximum.");
+
+        UpdateDailyData();
+
+	//Calculate bonus interest for longer stake periods (20% bonus per year)
+	uint256 nSharesModifier = 0;
+
+	//Minimum stake time of 3 months to get amplifier bonus
+	if(a_nDays >= 90)
 	{
-    uint256 nPenalty = 0;
-
-    if(block.timestamp < a_nEndStakeCommitTime)
-		{
-			//If they didn't stake for at least 1 full day we give them no interest
-			//To prevent any abuse
-			if(DifferenceInDays(a_tLockTime, block.timestamp) == 0)
-			{
-				nPenalty = a_nInterestEarned;
-			}
-			else
-			{
-				//Base penalty is half of earned interest
-				nPenalty = a_nInterestEarned.div(2);
-			}
-
-			uint256 nCommittedStakeDays = DifferenceInDays(a_tLockTime, a_nEndStakeCommitTime);
-
-			if(nCommittedStakeDays >= 90)
-			{
-				//Take another 10% per year of committed stake
-				nPenalty = nPenalty.add(nPenalty.mul(nCommittedStakeDays).div(3650));
-			}
-
-			//5% yearly interest converted to daily interest multiplied by stake time
-			uint256 nMinimumPenalty = a_nAmount.mul(nCommittedStakeDays).div(7300);
-
-			if(nMinimumPenalty > nPenalty)
-			{
-				nPenalty = nMinimumPenalty;
-			}
-		}
-
-    return nPenalty;
-  }
-
-  /// @dev Removes completed stake from global pool
-  /// @notice Removing finished stakes will increase the payout to other stakers.
-  /// @param a_nStakeIndex Index of stake to process
-	/// @param a_address Address of the staker
-  function EndStakeForAFriend(
-    uint256 a_nStakeIndex,
-		address a_address
-  ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[a_address].length > a_nStakeIndex, "Stake does not exist");
-
-    //Require that the stake has been matured
-    require(block.timestamp > m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
-
-		ProcessStakeEnding(a_nStakeIndex, a_address, true);
-  }
-
- 	/// @dev Ends a stake, even if it is before it has matured.
-	/// @notice If stake has matured behavior is the same as EndStakeSafely
-  /// @param a_nStakeIndex Index of stake to close
-  function EndStakeEarly(
-    uint256 a_nStakeIndex
-  ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
-
-    ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
-  }
-
-  /// @dev Ends a stake safely. Will only execute if a stake is matured.
-  /// @param a_nStakeIndex Index of stake to close
-  function EndStakeSafely(
-    uint256 a_nStakeIndex
-  ) external
-	{
-		//Require that the stake index doesn't go out of bounds
-		require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
-
-		//Require that stake is matured
-		require(block.timestamp > m_staked[msg.sender][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
-
-    ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
-  }
-
-	function ProcessStakeEnding(
-    uint256 a_nStakeIndex,
-		address a_address,
-		bool a_bWasForAFriend
-  ) internal
-	{
-		UpdateDailyData();
-
-    //Get a reference to the stake to save gas from constant map lookups
-    StakeStruct storage rStake = m_staked[a_address][a_nStakeIndex];
-
-    uint256 tEndTime = block.timestamp > rStake.tEndStakeCommitTime ?
-			rStake.tEndStakeCommitTime : block.timestamp;
-
-		//Calculate Payout
-		uint256 nTotalPayout = CalculatePayout(
-			rStake.nSharesStaked,
-			rStake.tLastCompoundedUpdateTime,
-			tEndTime
-		);
-
-		//Add any accumulated interest payout from user calling CompoundInterest
-		nTotalPayout = nTotalPayout.add(rStake.nCompoundedPayoutAccumulated);
-
-		//Add back the original amount staked
-		nTotalPayout = nTotalPayout.add(rStake.nAmountStaked);
-
-		//Is stake still in the global pool?
-		if(rStake.bIsInGlobalPool)
-		{
-			//Update global staked token tracking
-			m_nTotalStakedTokens = m_nTotalStakedTokens.sub(rStake.nAmountStaked);
-
-			//Update global stake shares tracking
-			m_nTotalStakeShares = m_nTotalStakeShares.sub(rStake.nSharesStaked);
-
-			//InterestRateMultiplier
-			m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].sub(rStake.nSharesStaked);
-
-			//Set time removed
-			rStake.tTimeRemovedFromGlobalPool = block.timestamp;
-
-			//Set flag that it is no longer in the global pool
-			rStake.bIsInGlobalPool = false;
-
-			if(a_bWasForAFriend)
-			{
-				emit EndStakeForAFriendEvent(
-					rStake.nSharesStaked,
-					rStake.tEndStakeCommitTime
-				);
-			}
-		}
-
-		//Calculate penalties if any
-		uint256 nPenalty = 0;
-		if(!a_bWasForAFriend)	//Can't have an early penalty if it was called by EndStakeForAFriend
- 		{
-			nPenalty = CalculateEarlyPenalty(
-				rStake.tLockTime,
-				rStake.tEndStakeCommitTime,
-				rStake.nAmountStaked,
-				nTotalPayout.sub(rStake.nAmountStaked)
-			);
-		}
-
-		//Only calculate late penalty if there wasn't an early penalty
-		if(nPenalty == 0)
-		{
-			nPenalty = CalculateLatePenalty(
-				rStake.tEndStakeCommitTime,
-				rStake.tTimeRemovedFromGlobalPool,
-				nTotalPayout.sub(rStake.nAmountStaked)
-			);
-		}
-
-		//Don't payout penalty amount that has already been paid out
-		if(nPenalty != 0 && !rStake.bIsLatePenaltyAlreadyPooled)
-		{
-			//Split penalty between genesis and pool
-			m_nEarlyAndLateUnstakePool = m_nEarlyAndLateUnstakePool.add(nPenalty.div(2));
-			_transfer(address(this), m_genesis, nPenalty.div(2));
-		}
-
-		if(a_bWasForAFriend)
-		{
-			//Set flag
-			rStake.bIsLatePenaltyAlreadyPooled =	true;
-		}
-		else
-		{
-			//Apply penalty
-			nTotalPayout = nTotalPayout.sub(nPenalty);
-
-			emit EndStakeEvent(
-				rStake.nAmountStaked,
-				nTotalPayout,
-        block.timestamp < rStake.tEndStakeCommitTime ?
-  				DifferenceInDays(rStake.tLockTime, block.timestamp) :
-  				DifferenceInDays(rStake.tLockTime, rStake.tTimeRemovedFromGlobalPool),
-				nPenalty,
-				rStake.nSharesStaked,
-				DifferenceInDays(rStake.tLockTime, rStake.tEndStakeCommitTime)
-			);
-
-			//Payout staked coins from contract
-			_transfer(address(this), a_address, nTotalPayout);
-
-			//Remove stake
-			RemoveStake(a_address, a_nStakeIndex);
-		}
+	    //We can't have a fractional modifier such as .5 so we need to use whole numbers and divide later
+	    nSharesModifier = a_nDays.mul(2000000).div(365);
 	}
 
-  /// @dev Remove stake from array
-  /// @param a_address address of staker
-  /// @param a_nStakeIndex index of the stake to delete
-  function RemoveStake(
-    address a_address,
-    uint256 a_nStakeIndex
-  ) internal
-	{
-    uint256 nEndingIndex = m_staked[a_address].length.sub(1);
+        //50% bonus shares per year of committed stake time
+        uint256 nStakeShares = a_nAmount.add(a_nAmount.mul(nSharesModifier).div(10000000));
 
-    //Only copy if we aren't removing the last index
-    if(nEndingIndex != a_nStakeIndex)
-    {
-      //Copy last stake in array over stake we are removing
-      m_staked[a_address][a_nStakeIndex] = m_staked[a_address][nEndingIndex];
+        //Create and store the stake
+        m_staked[msg.sender].push(
+            StakeStruct(
+                a_nAmount, // nAmountStaked
+                nStakeShares, // nSharesStaked
+		0,	//Accumulated Payout from CompoundInterest
+                block.timestamp, // tLockTime
+                tEndStakeCommitTime, // tEndStakeCommitTime
+		block.timestamp, //tLastCompoundedUpdateTime
+                0, // tTimeRemovedFromGlobalPool
+		a_nInterestMultiplierVote,
+		true, // bIsInGlobalPool
+                false // bIsLatePenaltyAlreadyPooled
+            )
+        );
+
+        emit StartStakeEvent(
+            a_nAmount,
+            a_nDays
+        );
+
+	//InterestRateMultiplier
+	m_votingMultiplierMap[a_nInterestMultiplierVote] = m_votingMultiplierMap[a_nInterestMultiplierVote].add(nStakeShares);
+
+        //Globally track staked tokens
+        m_nTotalStakedTokens = m_nTotalStakedTokens.add(a_nAmount);
+
+        //Globally track staked shares
+        m_nTotalStakeShares = m_nTotalStakeShares.add(nStakeShares);
+
+        //Transfer staked tokens to contract wallet
+        _transfer(msg.sender, address(this), a_nAmount);
     }
 
-    //Lower array length by 1
-    m_staked[a_address].length = nEndingIndex;
-  }
+    /// @dev Calculates penalty for unstaking late
+    /// @param a_tEndStakeCommitTime Timestamp stake matured
+    /// @param a_tTimeRemovedFromGlobalPool Timestamp stake was removed from global pool
+    /// @param a_nInterestEarned Interest earned from stake
+    /// @return penalty value
+    function CalculateLatePenalty(
+        uint256 a_tEndStakeCommitTime,
+        uint256 a_tTimeRemovedFromGlobalPool,
+        uint256 a_nInterestEarned
+    ) public pure returns (uint256)
+    {
+        uint256 nPenalty = 0;
+
+	//One week grace period
+        if(a_tTimeRemovedFromGlobalPool > a_tEndStakeCommitTime.add(1 weeks))
+	{
+            //Penalty is 1% per day after the 1 week grace period
+            uint256 nPenaltyPercent = DifferenceInDays(a_tEndStakeCommitTime.add(1 weeks), a_tTimeRemovedFromGlobalPool);
+
+	    //Cap max percent at 100
+	    if(nPenaltyPercent > 100)
+	    {
+	        nPenaltyPercent = 100;
+	    }
+
+            //Calculate penalty
+	    nPenalty = a_nInterestEarned.mul(nPenaltyPercent).div(100);
+        }
+
+        return nPenalty;
+    }
+
+    /// @dev Calculates penalty for unstaking early
+    /// @param a_tLockTime Starting timestamp of stake
+    /// @param a_nEndStakeCommitTime Timestamp the stake matures
+    /// @param a_nAmount Amount that was staked
+    /// @param a_nInterestEarned Interest earned from stake
+    /// @return penalty value
+    function CalculateEarlyPenalty(
+        uint256 a_tLockTime,
+	uint256 a_nEndStakeCommitTime,
+        uint256 a_nAmount,
+	uint256 a_nInterestEarned
+    ) public view returns (uint256)
+    {
+        uint256 nPenalty = 0;
+
+        if(block.timestamp < a_nEndStakeCommitTime)
+	{
+	    //If they didn't stake for at least 1 full day we give them no interest
+	    //To prevent any abuse
+	    if(DifferenceInDays(a_tLockTime, block.timestamp) == 0)
+	    {
+	        nPenalty = a_nInterestEarned;
+	    }
+	    else
+	    {
+	        //Base penalty is half of earned interest
+		nPenalty = a_nInterestEarned.div(2);
+	    }
+
+	    uint256 nCommittedStakeDays = DifferenceInDays(a_tLockTime, a_nEndStakeCommitTime);
+
+	    if(nCommittedStakeDays >= 90)
+	    {
+	        //Take another 10% per year of committed stake
+		nPenalty = nPenalty.add(nPenalty.mul(nCommittedStakeDays).div(3650));
+	    }
+
+	    //5% yearly interest converted to daily interest multiplied by stake time
+	    uint256 nMinimumPenalty = a_nAmount.mul(nCommittedStakeDays).div(7300);
+
+	    if(nMinimumPenalty > nPenalty)
+	    {
+	        nPenalty = nMinimumPenalty;
+	    }
+	}
+
+        return nPenalty;
+    }
+
+    /// @dev Removes completed stake from global pool
+    /// @notice Removing finished stakes will increase the payout to other stakers.
+    /// @param a_nStakeIndex Index of stake to process
+    /// @param a_address Address of the staker
+    function EndStakeForAFriend(
+        uint256 a_nStakeIndex,
+	address a_address
+    ) external
+    {
+        //Require that the stake index doesn't go out of bounds
+	require(m_staked[a_address].length > a_nStakeIndex, "Stake does not exist");
+
+        //Require that the stake has been matured
+        require(block.timestamp > m_staked[a_address][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
+
+	ProcessStakeEnding(a_nStakeIndex, a_address, true);
+    }
+
+    /// @dev Ends a stake, even if it is before it has matured.
+    /// @notice If stake has matured behavior is the same as EndStakeSafely
+    /// @param a_nStakeIndex Index of stake to close
+    function EndStakeEarly(
+        uint256 a_nStakeIndex
+    ) external
+    {
+        //Require that the stake index doesn't go out of bounds
+        require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
+
+        ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
+    }
+
+    /// @dev Ends a stake safely. Will only execute if a stake is matured.
+    /// @param a_nStakeIndex Index of stake to close
+    function EndStakeSafely(
+        uint256 a_nStakeIndex
+    ) external
+    {
+	//Require that the stake index doesn't go out of bounds
+	require(m_staked[msg.sender].length > a_nStakeIndex, "Stake does not exist");
+
+	//Require that stake is matured
+	require(block.timestamp > m_staked[msg.sender][a_nStakeIndex].tEndStakeCommitTime, "Stake must be matured.");
+
+        ProcessStakeEnding(a_nStakeIndex, msg.sender, false);
+    }
+
+    function ProcessStakeEnding(
+        uint256 a_nStakeIndex,
+	address a_address,
+	bool a_bWasForAFriend
+    ) internal
+    {
+	UpdateDailyData();
+
+        //Get a reference to the stake to save gas from constant map lookups
+        StakeStruct storage rStake = m_staked[a_address][a_nStakeIndex];
+
+        uint256 tEndTime = block.timestamp > rStake.tEndStakeCommitTime ?
+		rStake.tEndStakeCommitTime : block.timestamp;
+
+	//Calculate Payout
+	uint256 nTotalPayout = CalculatePayout(
+	    rStake.nSharesStaked,
+	    rStake.tLastCompoundedUpdateTime,
+	    tEndTime
+	);
+
+	//Add any accumulated interest payout from user calling CompoundInterest
+	nTotalPayout = nTotalPayout.add(rStake.nCompoundedPayoutAccumulated);
+
+	//Add back the original amount staked
+	nTotalPayout = nTotalPayout.add(rStake.nAmountStaked);
+
+	//Is stake still in the global pool?
+	if(rStake.bIsInGlobalPool)
+	{
+	    //Update global staked token tracking
+	    m_nTotalStakedTokens = m_nTotalStakedTokens.sub(rStake.nAmountStaked);
+
+	    //Update global stake shares tracking
+	    m_nTotalStakeShares = m_nTotalStakeShares.sub(rStake.nSharesStaked);
+
+	    //InterestRateMultiplier
+	    m_votingMultiplierMap[rStake.nVotedOnMultiplier] = m_votingMultiplierMap[rStake.nVotedOnMultiplier].sub(rStake.nSharesStaked);
+
+	    //Set time removed
+	    rStake.tTimeRemovedFromGlobalPool = block.timestamp;
+
+	    //Set flag that it is no longer in the global pool
+	    rStake.bIsInGlobalPool = false;
+
+	    if(a_bWasForAFriend)
+	    {
+	        emit EndStakeForAFriendEvent(
+		    rStake.nSharesStaked,
+		    rStake.tEndStakeCommitTime
+		);
+	    }
+	}
+
+	//Calculate penalties if any
+	uint256 nPenalty = 0;
+	if(!a_bWasForAFriend)	//Can't have an early penalty if it was called by EndStakeForAFriend
+ 	{
+	    nPenalty = CalculateEarlyPenalty(
+	        rStake.tLockTime,
+		rStake.tEndStakeCommitTime,
+		rStake.nAmountStaked,
+		nTotalPayout.sub(rStake.nAmountStaked)
+	    );
+	}
+
+	//Only calculate late penalty if there wasn't an early penalty
+	if(nPenalty == 0)
+	{
+	    nPenalty = CalculateLatePenalty(
+	        rStake.tEndStakeCommitTime,
+		rStake.tTimeRemovedFromGlobalPool,
+		nTotalPayout.sub(rStake.nAmountStaked)
+	    );
+	}
+
+	//Don't payout penalty amount that has already been paid out
+	if(nPenalty != 0 && !rStake.bIsLatePenaltyAlreadyPooled)
+	{
+	    //Split penalty between genesis and pool
+	    m_nEarlyAndLateUnstakePool = m_nEarlyAndLateUnstakePool.add(nPenalty.div(2));
+	    _transfer(address(this), m_genesis, nPenalty.div(2));
+	}
+
+	if(a_bWasForAFriend)
+	{
+	    //Set flag
+	    rStake.bIsLatePenaltyAlreadyPooled = true;
+	}
+	else
+	{
+	    //Apply penalty
+	    nTotalPayout = nTotalPayout.sub(nPenalty);
+
+	    emit EndStakeEvent(
+	        rStake.nAmountStaked,
+		nTotalPayout,
+                block.timestamp < rStake.tEndStakeCommitTime ?
+  		    DifferenceInDays(rStake.tLockTime, block.timestamp) :
+  		DifferenceInDays(rStake.tLockTime, rStake.tTimeRemovedFromGlobalPool),
+		nPenalty,
+		rStake.nSharesStaked,
+		DifferenceInDays(rStake.tLockTime, rStake.tEndStakeCommitTime)
+	    );
+
+	    //Payout staked coins from contract
+	    _transfer(address(this), a_address, nTotalPayout);
+
+	    //Remove stake
+	    RemoveStake(a_address, a_nStakeIndex);
+	}
+    }
+
+    /// @dev Remove stake from array
+    /// @param a_address address of staker
+    /// @param a_nStakeIndex index of the stake to delete
+    function RemoveStake(
+        address a_address,
+        uint256 a_nStakeIndex
+    ) internal
+    {
+        uint256 nEndingIndex = m_staked[a_address].length.sub(1);
+
+        //Only copy if we aren't removing the last index
+        if(nEndingIndex != a_nStakeIndex)
+        {
+            //Copy last stake in array over stake we are removing
+            m_staked[a_address][a_nStakeIndex] = m_staked[a_address][nEndingIndex];
+        }
+
+        //Lower array length by 1
+        m_staked[a_address].length = nEndingIndex;
+    }
 }
