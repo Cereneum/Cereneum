@@ -12,7 +12,7 @@ contract Cereneum is CereneumImplementation
         bytes32 a_hBTCMerkleTreeRoot,
 	bytes32 a_hBCHMerkleTreeRoot,
 	bytes32 a_hBSVMerkleTreeRoot,
-        bytes32 a_hETHMerkleTreeRoot,
+	bytes32 a_hETHMerkleTreeRoot,
 	bytes32 a_hLTCMerkleTreeRoot
     )
     public
@@ -32,11 +32,11 @@ contract Cereneum is CereneumImplementation
 	m_blockchainRatios[2] = 3106; //ETH
 	m_blockchainRatios[3] = 1311; //LTC
 
-	//Binance 1
+        //Binance 1
 	m_exchangeAirdropAddresses[0] = 0x3f5CE5FBFe3E9af3971dD833D26bA9b5C936f0bE;
 	m_exchangeAirdropAmounts[0] = 17400347788910;
 
-        //Binance 2
+	//Binance 2
 	m_exchangeAirdropAddresses[1] = 0xD551234Ae421e3BCBA99A0Da6d736074f22192FF;
 	m_exchangeAirdropAmounts[1] = 6758097982665;
 
@@ -48,7 +48,7 @@ contract Cereneum is CereneumImplementation
 	m_exchangeAirdropAddresses[3] = 0x0681d8Db095565FE8A346fA0277bFfdE9C0eDBBF;
 	m_exchangeAirdropAmounts[3] = 5953786344335;
 
-	//Binance 5 has little ether in it
+        //Binance 5 has little ether in it
 
 	//Binance 6
 	m_exchangeAirdropAddresses[4] = 0x4E9ce36E442e55EcD9025B9a6E0D88485d628A67;
@@ -125,7 +125,7 @@ contract Cereneum is CereneumImplementation
 	    //Grant 20% bonus of tokens to referrer
 	    nPublicReferralBonuses = nPublicReferralBonuses.add(nTokensRedeemed.div(5));
 
-	    m_nTotalRedeemed = m_nTotalRedeemed.add(m_exchangeAirdropAmounts[i]);
+	    m_nTotalRedeemed = m_nTotalRedeemed.add(GetRedeemRatio(m_exchangeAirdropAmounts[i], BlockchainType.Ethereum));
 	    m_nRedeemedCount = m_nRedeemedCount.add(1);
 	}
 
@@ -140,7 +140,7 @@ contract Cereneum is CereneumImplementation
     /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
     /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
     /*** TEST FUNCTIONS TO BE REMOVED BEFORE LAUNCHING ***/
-    /*function testAdjustContractLaunchTime(
+    function testAdjustContractLaunchTime(
         uint256 a_days
     ) external
     {
@@ -162,7 +162,7 @@ contract Cereneum is CereneumImplementation
 
     function testGetSpeedBonus(uint256 a_nAmount, uint256 a_nDays) public pure returns (uint256)
     {
-        if(a_nDays < m_nClaimPhaseBufferDays)
+	if(a_nDays < m_nClaimPhaseBufferDays)
 	{
 	    a_nDays = 0;
 	}
@@ -231,9 +231,7 @@ contract Cereneum is CereneumImplementation
     {
         UpdateDailyData();
 
-	require(m_nTotalRedeemed.add(a_nAmount) <= m_nMaxRedeemable);
-
-	m_nTotalRedeemed = m_nTotalRedeemed.add(a_nAmount);
+        m_nTotalRedeemed = m_nTotalRedeemed.add(GetRedeemRatio(a_nAmount, a_nWhichChain));
 
 	(uint256 nRedeemed, uint256 nBonuses, uint256 nPenalties) = GetRedeemAmount(a_nAmount, a_nWhichChain);
 
@@ -258,14 +256,14 @@ contract Cereneum is CereneumImplementation
         address a_address
     ) public view returns (uint256)
     {
-        return m_staked[a_address][0].nAmountStaked;
+	return m_staked[a_address][0].nAmountStaked;
     }
 
     function getStakeStructEndTime(
         address a_address
     ) public view returns (uint256)
     {
-        return m_staked[a_address][0].tEndStakeCommitTime;
+	return m_staked[a_address][0].tEndStakeCommitTime;
     }
 
     function getStakeStructLockTime(
@@ -278,6 +276,6 @@ contract Cereneum is CereneumImplementation
     function getBlockTime(
     ) public view returns (uint256)
     {
-        return block.timestamp;
-    }*/
+	return block.timestamp;
+    }
 }
