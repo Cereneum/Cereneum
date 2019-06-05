@@ -474,300 +474,300 @@ contract CereneumImplementation is CereneumData
         );
     }
 
-  /// @dev Check if address can make a claim
-  /// @param a_addressRedeeming Raw Bitcoin address (no base58-check encoding)
-  /// @param a_nAmount Amount of UTXO to redeem
-  /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
-  /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
-  /// @return Boolean on if the UTXO can be redeemed
-  function CanClaim(
-    bytes20 a_addressRedeeming,
-    uint256 a_nAmount,
-    bytes32[] memory a_hMerkleTreeBranches,
-    BlockchainType a_nWhichChain
-  ) public view returns (bool)
-	{
-    //Calculate the hash of the Merkle leaf associated with this UTXO
-    bytes32 hMerkleLeafHash = keccak256(
-      abi.encodePacked(
-        a_addressRedeeming,
-        a_nAmount
-      )
-    );
+    /// @dev Check if address can make a claim
+    /// @param a_addressRedeeming Raw Bitcoin address (no base58-check encoding)
+    /// @param a_nAmount Amount of UTXO to redeem
+    /// @param a_hMerkleTreeBranches Merkle tree branches from leaf to root
+    /// @param a_nWhichChain Which blockchain is claiming, 0=BTC, 1=BCH, 2=BSV, 3=ETH, 4=LTC
+    /// @return Boolean on if the UTXO can be redeemed
+    function CanClaim(
+        bytes20 a_addressRedeeming,
+        uint256 a_nAmount,
+        bytes32[] memory a_hMerkleTreeBranches,
+        BlockchainType a_nWhichChain
+    ) public view returns (bool)
+    {
+        //Calculate the hash of the Merkle leaf associated with this UTXO
+        bytes32 hMerkleLeafHash = keccak256(
+            abi.encodePacked(
+                a_addressRedeeming,
+                a_nAmount
+            )
+        );
 
-    //Check if it can be redeemed
-    return CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain);
-  }
+        //Check if it can be redeemed
+        return CanClaimUTXOHash(hMerkleLeafHash, a_hMerkleTreeBranches, a_nWhichChain);
+    }
 
-	/// @dev Calculates the monthly Robin Hood reward
-  /// @param a_nAmount The amount to calculate from
-  /// @param a_nDaysSinceLaunch The number of days since contract launch
-  /// @return The amount after applying monthly Robin Hood calculation
-	function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+    /// @dev Calculates the monthly Robin Hood reward
+    /// @param a_nAmount The amount to calculate from
+    /// @param a_nDaysSinceLaunch The number of days since contract launch
+    /// @return The amount after applying monthly Robin Hood calculation
+    function GetRobinHoodMonthlyAmount(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+    {
+        uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+	uint256 nScalar = 400000000000000;	// 0.25%
+	//Month 1 - 0.25% late penalty
+	if(a_nDaysSinceLaunch < 43)
 	{
-		uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-		uint256 nScalar = 400000000000000;	// 0.25%
-		//Month 1 - 0.25% late penalty
-		if(a_nDaysSinceLaunch < 43)
-		{
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 2 - Additional 0.5% penalty
-		// 0.25% + 0.5% = .75%
-		else if(a_nDaysSinceLaunch < 72)
-		{
-			nScalar = 200000000000000;	// 0.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 3 - Additional 0.75% penalty
-		// 0.25% + 0.5% + .75% = 1.5%
-		else if(a_nDaysSinceLaunch < 101)
-		{
-			nScalar = 133333333333333;	// 0.75%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 4 - Additional 1.5%
-		// 0.25% + 0.5% + .75% + 1.5% = 3%
-		else if(a_nDaysSinceLaunch < 130)
-		{
-			nScalar = 66666666666666;	// 1.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 5 - Additional 3%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
-		else if(a_nDaysSinceLaunch < 159)
-		{
-			nScalar = 33333333333333;	// 3%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 6 - Additional 6%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
-		else if(a_nDaysSinceLaunch < 188)
-		{
-			nScalar = 16666666666666;	// 6%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 7 - Additional 8%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
-		else if(a_nDaysSinceLaunch < 217)
-		{
-			nScalar = 12499999999999;	// 8%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 8 - Additional 10%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
-		else if(a_nDaysSinceLaunch < 246)
-		{
-			nScalar = 10000000000000;	// 10%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 9 - Additional 12.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
-		else if(a_nDaysSinceLaunch < 275)
-		{
-			nScalar = 7999999999999;	// 12.5%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 10 - Additional 15%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
-		else if(a_nDaysSinceLaunch < 304)
-		{
-			nScalar = 6666666666666;	// 15%
-			return nScaledAmount.div(nScalar.mul(29));
-		}
-		//Month 11 - Additional 17.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
-		else if(a_nDaysSinceLaunch < 334)
-		{
-			nScalar = 5714285714290;	// 17.5%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
-		//Month 12 - Additional 25%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
-		else if(a_nDaysSinceLaunch < 364)
-		{
-			nScalar = 4000000000000;	// 25%
-			return nScaledAmount.div(nScalar.mul(30));
-		}
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 2 - Additional 0.5% penalty
+	// 0.25% + 0.5% = .75%
+	else if(a_nDaysSinceLaunch < 72)
+	{
+	    nScalar = 200000000000000;	// 0.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 3 - Additional 0.75% penalty
+	// 0.25% + 0.5% + .75% = 1.5%
+	else if(a_nDaysSinceLaunch < 101)
+	{
+	    nScalar = 133333333333333;	// 0.75%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 4 - Additional 1.5%
+	// 0.25% + 0.5% + .75% + 1.5% = 3%
+	else if(a_nDaysSinceLaunch < 130)
+	{
+	    nScalar = 66666666666666;	// 1.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 5 - Additional 3%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
+	else if(a_nDaysSinceLaunch < 159)
+	{
+	    nScalar = 33333333333333;	// 3%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 6 - Additional 6%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
+	else if(a_nDaysSinceLaunch < 188)
+	{
+	    nScalar = 16666666666666;	// 6%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 7 - Additional 8%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
+	else if(a_nDaysSinceLaunch < 217)
+	{
+	    nScalar = 12499999999999;	// 8%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 8 - Additional 10%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
+	else if(a_nDaysSinceLaunch < 246)
+	{
+	    nScalar = 10000000000000;	// 10%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 9 - Additional 12.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
+	else if(a_nDaysSinceLaunch < 275)
+	{
+	    nScalar = 7999999999999;	// 12.5%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 10 - Additional 15%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
+	else if(a_nDaysSinceLaunch < 304)
+	{
+	    nScalar = 6666666666666;	// 15%
+	    return nScaledAmount.div(nScalar.mul(29));
+	}
+	//Month 11 - Additional 17.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
+	else if(a_nDaysSinceLaunch < 334)
+	{
+	    nScalar = 5714285714290;	// 17.5%
+	    return nScaledAmount.div(nScalar.mul(30));
+	}
+	//Month 12 - Additional 25%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
+	else if(a_nDaysSinceLaunch < 364)
+	{
+	    nScalar = 4000000000000;	// 25%
+	    return nScaledAmount.div(nScalar.mul(30));
+	}
+    }
+
+    /// @dev Calculates the monthly late penalty
+    /// @param a_nAmount The amount to calculate from
+    /// @param a_nDaysSinceLaunch The number of days since contract launch
+    /// @return The amount after applying monthly late penalty
+    function GetMonthlyLatePenalty(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+    {
+        if(a_nDaysSinceLaunch <= m_nClaimPhaseBufferDays)
+	{
+	    return 0;
 	}
 
-	/// @dev Calculates the monthly late penalty
-  /// @param a_nAmount The amount to calculate from
-  /// @param a_nDaysSinceLaunch The number of days since contract launch
-  /// @return The amount after applying monthly late penalty
-	function GetMonthlyLatePenalty(uint256 a_nAmount, uint256 a_nDaysSinceLaunch) public pure returns (uint256)
+	uint256 nScaledAmount = a_nAmount.mul(1000000000000);
+	uint256 nPreviousMonthPenalty = 0;
+	uint256 nScalar = 400000000000000;	// 0.25%
+	//Month 1 - 0.25% late penalty
+	if(a_nDaysSinceLaunch <= 43)
 	{
-		if(a_nDaysSinceLaunch <= m_nClaimPhaseBufferDays)
-		{
-			return 0;
-		}
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(14);
+	    return nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	}
+	//Month 2 - Additional 0.5% penalty
+	// 0.25% + 0.5% = .75%
+	else if(a_nDaysSinceLaunch <= 72)
+	{
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(43);
+	    nScalar = 200000000000000;	// 0.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 3 - Additional 0.75% penalty
+	// 0.25% + 0.5% + .75% = 1.5%
+	else if(a_nDaysSinceLaunch <= 101)
+	{
+	    nScalar = 133333333333333;	// 0.75%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(72);
+	    nScalar = 133333333333333;	// 0.75%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 4 - Additional 1.5%
+	// 0.25% + 0.5% + .75% + 1.5% = 3%
+	else if(a_nDaysSinceLaunch <= 130)
+	{
+	    nScalar = 66666666666666;	// 1.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(101);
+	    nScalar = 66666666666666;	// 1.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 5 - Additional 3%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
+	else if(a_nDaysSinceLaunch <= 159)
+	{
+	    nScalar = 33333333333333;	// 3%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(130);
+	    nScalar = 33333333333333;	// 3%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 6 - Additional 6%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
+	else if(a_nDaysSinceLaunch <= 188)
+	{
+	    nScalar = 16666666666666;	// 6%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(159);
+	    nScalar = 16666666666666;	// 6%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 7 - Additional 8%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
+	else if(a_nDaysSinceLaunch <= 217)
+	{
+	    nScalar = 8333333333333;	// 12%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(188);
+	    nScalar = 12499999999999;	// 8%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 8 - Additional 10%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
+	else if(a_nDaysSinceLaunch <= 246)
+	{
+	    nScalar = 5000000000000;	// 20%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(217);
+	    nScalar = 10000000000000;	// 10%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 9 - Additional 12.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
+	else if(a_nDaysSinceLaunch <= 275)
+	{
+	    nScalar = 3333333333333;	// 30%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(246);
+	    nScalar = 7999999999999;	// 12.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 10 - Additional 15%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
+	else if(a_nDaysSinceLaunch <= 304)
+	{
+	    nScalar = 2352941176472;	// 42.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(275);
+	    nScalar = 6666666666666;	// 15%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 11 - Additional 17.5%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
+	else if(a_nDaysSinceLaunch <= 334)
+	{
+	    nScalar = 1739130434782;	// 57.5%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(304);
+	    nScalar = 5714285714290;	// 17.5%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	//Month 12 - Additional 25%
+	// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
+	else if(a_nDaysSinceLaunch < 364)
+	{
+	    nScalar = 1333333333333;	// 75%
+	    nPreviousMonthPenalty = nScaledAmount.div(nScalar);
+	    a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(334);
+	    nScalar = 4000000000000;	// 25%
+	    nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
+	    return nScaledAmount.add(nPreviousMonthPenalty);
+	}
+	else
+	{
+	    return a_nAmount;
+	}
+    }
 
-		uint256 nScaledAmount = a_nAmount.mul(1000000000000);
-		uint256 nPreviousMonthPenalty = 0;
-		uint256 nScalar = 400000000000000;	// 0.25%
-		//Month 1 - 0.25% late penalty
-		if(a_nDaysSinceLaunch <= 43)
-		{
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(14);
-			return nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-		}
-		//Month 2 - Additional 0.5% penalty
-		// 0.25% + 0.5% = .75%
-		else if(a_nDaysSinceLaunch <= 72)
-		{
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(43);
-			nScalar = 200000000000000;	// 0.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 3 - Additional 0.75% penalty
-		// 0.25% + 0.5% + .75% = 1.5%
-		else if(a_nDaysSinceLaunch <= 101)
-		{
-			nScalar = 133333333333333;	// 0.75%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(72);
-			nScalar = 133333333333333;	// 0.75%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 4 - Additional 1.5%
-		// 0.25% + 0.5% + .75% + 1.5% = 3%
-		else if(a_nDaysSinceLaunch <= 130)
-		{
-			nScalar = 66666666666666;	// 1.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(101);
-			nScalar = 66666666666666;	// 1.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 5 - Additional 3%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% = 6%
-		else if(a_nDaysSinceLaunch <= 159)
-		{
-			nScalar = 33333333333333;	// 3%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(130);
-			nScalar = 33333333333333;	// 3%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 6 - Additional 6%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% = 12%
-		else if(a_nDaysSinceLaunch <= 188)
-		{
-			nScalar = 16666666666666;	// 6%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(159);
-			nScalar = 16666666666666;	// 6%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 7 - Additional 8%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% = 20%
-		else if(a_nDaysSinceLaunch <= 217)
-		{
-			nScalar = 8333333333333;	// 12%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(188);
-			nScalar = 12499999999999;	// 8%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 8 - Additional 10%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% = 30%
-		else if(a_nDaysSinceLaunch <= 246)
-		{
-			nScalar = 5000000000000;	// 20%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(217);
-			nScalar = 10000000000000;	// 10%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 9 - Additional 12.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% = 42.5%
-		else if(a_nDaysSinceLaunch <= 275)
-		{
-			nScalar = 3333333333333;	// 30%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(246);
-			nScalar = 7999999999999;	// 12.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 10 - Additional 15%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% = 57.5%
-		else if(a_nDaysSinceLaunch <= 304)
-		{
-			nScalar = 2352941176472;	// 42.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(275);
-			nScalar = 6666666666666;	// 15%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(29));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 11 - Additional 17.5%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% = 75%
-		else if(a_nDaysSinceLaunch <= 334)
-		{
-			nScalar = 1739130434782;	// 57.5%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(304);
-			nScalar = 5714285714290;	// 17.5%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		//Month 12 - Additional 25%
-		// 0.25% + 0.5% + .75% + 1.5% + 3% + 6% + 8% + 10% + 12.5% + 15% + 17.5% + 25% = 100%
-		else if(a_nDaysSinceLaunch < 364)
-		{
-			nScalar = 1333333333333;	// 75%
-			nPreviousMonthPenalty = nScaledAmount.div(nScalar);
-			a_nDaysSinceLaunch = a_nDaysSinceLaunch.sub(334);
-			nScalar = 4000000000000;	// 25%
-			nScaledAmount = nScaledAmount.mul(a_nDaysSinceLaunch).div(nScalar.mul(30));
-			return nScaledAmount.add(nPreviousMonthPenalty);
-		}
-		else
-		{
-			return a_nAmount;
-		}
+    /// @dev Returns claim amount with deduction based on weeks since contract launch.
+    /// @param a_nAmount Amount of claim from UTXO
+    /// @return Amount after any late penalties
+    function GetLateClaimAmount(uint256 a_nAmount) internal view returns (uint256)
+    {
+        uint256 nDaysSinceLaunch = DaysSinceLaunch();
+
+	return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, nDaysSinceLaunch));
+    }
+
+    /// @dev Calculates speed bonus for claiming early
+    /// @param a_nAmount Amount of claim from UTXO
+    /// @return Speed bonus amount
+    function GetSpeedBonus(uint256 a_nAmount) internal view returns (uint256)
+    {
+        uint256 nDaysSinceLaunch = DaysSinceLaunch();
+
+	//We give a two week buffer after contract launch before penalties
+	if(nDaysSinceLaunch < m_nClaimPhaseBufferDays)
+	{
+	    nDaysSinceLaunch = 0;
+	}
+	else
+	{
+	    nDaysSinceLaunch = nDaysSinceLaunch.sub(m_nClaimPhaseBufferDays);
 	}
 
-	/// @dev Returns claim amount with deduction based on weeks since contract launch.
-	/// @param a_nAmount Amount of claim from UTXO
-	/// @return Amount after any late penalties
-	function GetLateClaimAmount(uint256 a_nAmount) internal view returns (uint256)
-	{
-		uint256 nDaysSinceLaunch = DaysSinceLaunch();
-
-		return a_nAmount.sub(GetMonthlyLatePenalty(a_nAmount, nDaysSinceLaunch));
-	}
-
-  /// @dev Calculates speed bonus for claiming early
-  /// @param a_nAmount Amount of claim from UTXO
-  /// @return Speed bonus amount
-  function GetSpeedBonus(uint256 a_nAmount) internal view returns (uint256)
-	{
-		uint256 nDaysSinceLaunch = DaysSinceLaunch();
-
-		//We give a two week buffer after contract launch before penalties
-		if(nDaysSinceLaunch < m_nClaimPhaseBufferDays)
-		{
-			nDaysSinceLaunch = 0;
-		}
-		else
-		{
-			nDaysSinceLaunch = nDaysSinceLaunch.sub(m_nClaimPhaseBufferDays);
-		}
-
-    uint256 nMaxDays = 350;
-    a_nAmount = a_nAmount.div(5);
-    return a_nAmount.mul(nMaxDays.sub(nDaysSinceLaunch)).div(nMaxDays);
-  }
+        uint256 nMaxDays = 350;
+        a_nAmount = a_nAmount.div(5);
+        return a_nAmount.mul(nMaxDays.sub(nDaysSinceLaunch)).div(nMaxDays);
+    }
 
 	/// @dev Gets the redeem amount with the blockchain ratio applied.
 	/// @param a_nAmount Amount of UTXO in satoshis
