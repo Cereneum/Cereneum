@@ -188,6 +188,91 @@ contract('Cereneum', (accounts) => {
       Math.floor(parseInt(2414794474090, 10) * .50 * ethRatio)-1,
       "Genesis balance incorrect");
   });
+  it('TestClaimRedeemRatios', async () => {
+    const cereneumInstance = await Cereneum.new(
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xa3ce697bffc616361177ced6ae8c54e129f06f03a4ecbef247f74f256956db1c",
+      "0x13a87bd8059e2fc8a1bd484a22c47d378203c31bef9154f232c02691ca7088d2",
+      "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
+      "0xbcadc800860b8ed310fff0a6975cf06a0773afe9383a20baefe66accf1189f39");
+
+      var nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+      assert(nTotalRedeemed == 0, "Starting redeem not 0");
+
+      var nClaimAmount = 100000000;
+      await cereneumInstance.testFakeClaim(
+            nClaimAmount,
+            accounts[1],
+            1 //BCH
+          );
+
+        var bchRatio = await cereneumInstance.m_blockchainRatios(0);
+        bchRatio = "0.0" + bchRatio;
+        bchRatio = parseFloat(bchRatio);
+
+        var nExpectedBCHRatioClaim = parseFloat(bchRatio * nClaimAmount);
+
+        nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+
+        assert(nExpectedBCHRatioClaim == nTotalRedeemed, "Expected BCH claim incorrect");
+
+        await cereneumInstance.testFakeClaim(
+              nClaimAmount,
+              accounts[1],
+              2 //BSV
+            );
+
+        var bsvRatio = await cereneumInstance.m_blockchainRatios(1);
+        bsvRatio = "0.0" + bsvRatio;
+        bsvRatio = parseFloat(bsvRatio);
+
+        var nExpectedBSVRatioClaim = parseFloat(bsvRatio * nClaimAmount);
+
+        nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+
+        assert(nExpectedBCHRatioClaim + nExpectedBSVRatioClaim == nTotalRedeemed, "Expected BSV claim incorrect");
+
+        await cereneumInstance.testFakeClaim(
+              nClaimAmount,
+              accounts[1],
+              3 //ETH
+            );
+
+        var ethRatio = await cereneumInstance.m_blockchainRatios(2);
+        ethRatio = "0.0" + ethRatio;
+        ethRatio = parseFloat(ethRatio);
+
+        var nExpectedETHRatioClaim = parseFloat(ethRatio * nClaimAmount);
+
+        nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+
+        assert(nExpectedETHRatioClaim + nExpectedBCHRatioClaim + nExpectedBSVRatioClaim == nTotalRedeemed, "Expected ETH claim incorrect");
+
+        await cereneumInstance.testFakeClaim(
+              nClaimAmount,
+              accounts[1],
+              4 //LTC
+            );
+
+        var ltcRatio = await cereneumInstance.m_blockchainRatios(3);
+        ltcRatio = "0.0" + ltcRatio;
+        ltcRatio = parseFloat(ltcRatio);
+
+        var nExpectedLTCRatioClaim = parseFloat(ltcRatio * nClaimAmount);
+
+        nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+
+        assert(nExpectedLTCRatioClaim + nExpectedETHRatioClaim + nExpectedBCHRatioClaim + nExpectedBSVRatioClaim == nTotalRedeemed, "Expected LTC claim incorrect");
+
+        await cereneumInstance.testFakeClaim(
+              nClaimAmount,
+              accounts[1],
+              0 //BTC
+            );
+
+        nTotalRedeemed = await cereneumInstance.m_nTotalRedeemed();
+        assert(nClaimAmount + nExpectedLTCRatioClaim + nExpectedETHRatioClaim + nExpectedBCHRatioClaim + nExpectedBSVRatioClaim == nTotalRedeemed, "Expected BTC claim incorrect");
+  });
   it('TestSupply', async () => {
     const cereneumInstance = await Cereneum.new(
       "0x0c532d4403e2a9644626ec987849f89df97807b07badf54f360a538700c872fd",
