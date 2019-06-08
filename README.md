@@ -41,9 +41,17 @@ truffle migrate
 
 ## UTXO Snapshots
 
-The UTXO Snapshots of all 5 chains can be downloaded here for public verification
+The UTXO Snapshots of all 5 chains can be downloaded here for public verification:
 
 https://drive.google.com/open?id=13550Xcs1hRLkEoum4KXuqQcVr2o0-s63
+
+## UTXO Merkle Trees
+
+The Merkle Trees of all 5 chains can be downloaded here for public verification:
+
+https://drive.google.com/open?id=1GwHyy8TRWlelbmsRSQFAQWfV-A2Oz7GR
+
+Each Merkle Leaf is a Keccak256 hash of the public address and the amount from the UTXO files.
 
 ## Acknowledgements
 
