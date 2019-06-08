@@ -39,6 +39,12 @@ Make sure Ganache is running with the proper configurations matched to truffle-c
 truffle migrate
 ```
 
+## UTXO Snapshots
+
+The UTXO Snapshots of all 5 chains can be downloaded here for public verification
+
+https://drive.google.com/open?id=13550Xcs1hRLkEoum4KXuqQcVr2o0-s63
+
 ## Acknowledgements
 
 A big thank you to the OpenZeppelin team for the ERC20, SafeMath and MerkleProof libraries.
