@@ -52,6 +52,8 @@ The Merkle Trees of all 5 chains can be downloaded here for public verification:
 https://drive.google.com/open?id=1GwHyy8TRWlelbmsRSQFAQWfV-A2Oz7GR
 
 Each Merkle Leaf is a Keccak256 hash of the public address and the amount from the UTXO files.
+The Merkle Tree was built in sorted order. Users can verify that the Merkle Root in the files
+matches the Merkle Roots in the contract.
 
 ## Acknowledgements
 
