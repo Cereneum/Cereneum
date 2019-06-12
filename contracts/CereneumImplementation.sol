@@ -1064,7 +1064,7 @@ contract CereneumImplementation is CereneumData
 	    nSharesModifier = a_nDays.mul(2000000).div(365);
 	}
 
-        //50% bonus shares per year of committed stake time
+        //20% bonus shares per year of committed stake time
         uint256 nStakeShares = a_nAmount.add(a_nAmount.mul(nSharesModifier).div(10000000));
 
         //Create and store the stake
